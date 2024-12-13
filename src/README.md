@@ -6,7 +6,7 @@ tags:
   - privileged
 ---
 
-# Component: `identity`
+# Component: `identity-center`
 
 This component is responsible for creating [AWS SSO Permission Sets][1] and creating AWS SSO Account Assignments, that
 is, assigning IdP (Okta) groups and/or users to AWS SSO permission sets in specific AWS Accounts.
