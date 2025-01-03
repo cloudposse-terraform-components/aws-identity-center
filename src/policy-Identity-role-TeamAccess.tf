@@ -19,9 +19,9 @@ data "aws_iam_policy_document" "assume_aws_team" {
     resources = ["*"]
 
     /* For future reference, this tag-based restriction also works, based on
-       the fact that we always tag our IAM roles with the "Name" tag.
-       This could be used to control access based on some other tag, like "Category",
-       so is left here as an example.
+      the fact that we always tag our IAM roles with the "Name" tag.
+      This could be used to control access based on some other tag, like "Category",
+      so is left here as an example.
 
     condition {
       test     = "ForAllValues:StringEquals"
