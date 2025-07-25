@@ -3,7 +3,7 @@ locals {
     name                                = "AdministratorAccess",
     description                         = "Allow Full Administrator access to the account",
     relay_state                         = "",
-    session_duration                    = var.default_session_duration,
+    session_duration                    = var.session_duration,
     tags                                = {},
     inline_policy                       = ""
     policy_attachments                  = ["arn:${local.aws_partition}:iam::aws:policy/AdministratorAccess"]

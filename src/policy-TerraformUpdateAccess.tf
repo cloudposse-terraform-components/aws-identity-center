@@ -47,7 +47,7 @@ locals {
     name                                = "TerraformUpdateAccess",
     description                         = "Allow access to Terraform state sufficient to make changes",
     relay_state                         = "",
-    session_duration                    = var.default_session_duration,
+    session_duration                    = var.session_duration,
     tags                                = {},
     inline_policy                       = one(data.aws_iam_policy_document.terraform_update_access[*].json),
     policy_attachments                  = []
