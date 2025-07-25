@@ -75,3 +75,4 @@ github/
 
 *.zip
 account-map/
+.atmos/
