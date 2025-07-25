@@ -3,7 +3,7 @@ locals {
     name             = "PowerUserAccess",
     description      = "Allow Poweruser access to the account",
     relay_state      = "",
-    session_duration = "",
+    session_duration = var.session_duration,
     tags             = {},
     inline_policy    = ""
     policy_attachments = [

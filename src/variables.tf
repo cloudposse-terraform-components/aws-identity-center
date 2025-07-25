@@ -52,3 +52,9 @@ variable "groups" {
     EOT
   default     = []
 }
+
+variable "session_duration" {
+  type        = string
+  description = "The default duration of the session in seconds for all permission sets. If not set, fallback to the default value in the module, which is 1 hour."
+  default     = ""
+}
