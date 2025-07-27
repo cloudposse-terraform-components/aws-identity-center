@@ -14,7 +14,7 @@ module "tfstate" {
 
   bypass = !local.tf_update_access_enabled
 
-  component   = "tfstate-backend"
+  component   = var.tfstate_backend_component_name
   environment = var.tfstate_environment_name
   stage       = module.iam_roles.global_stage_name
   privileged  = var.privileged
