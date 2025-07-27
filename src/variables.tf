@@ -58,3 +58,9 @@ variable "session_duration" {
   description = "The default duration of the session in seconds for all permission sets. If not set, fallback to the default value in the module, which is 1 hour."
   default     = ""
 }
+
+variable "tfstate_backend_component_name" {
+  type        = string
+  description = "The name of the tfstate-backend component"
+  default     = "tfstate-backend"
+}
