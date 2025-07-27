@@ -2,7 +2,7 @@ module "account_map" {
   source  = "cloudposse/stack-config/yaml//modules/remote-state"
   version = "1.8.0"
 
-  component   = "account-map"
+  component   = var.account_map_component_name
   environment = module.iam_roles.global_environment_name
   stage       = module.iam_roles.global_stage_name
   tenant      = module.iam_roles.global_tenant_name

@@ -64,3 +64,9 @@ variable "tfstate_backend_component_name" {
   description = "The name of the tfstate-backend component"
   default     = "tfstate-backend"
 }
+
+variable "account_map_component_name" {
+  type        = string
+  description = "The name of the account-map component"
+  default     = "account-map"
+}
