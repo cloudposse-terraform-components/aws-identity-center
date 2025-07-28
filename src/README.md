@@ -249,6 +249,7 @@ components:
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_account_assignments"></a> [account\_assignments](#input\_account\_assignments) | Enables access to permission sets for users and groups in accounts, in the following structure:<pre>yaml<br/><account-name>:<br/>  groups:<br/>    <group-name>:<br/>      permission_sets:<br/>        - <permission-set-name><br/>  users:<br/>    <user-name>:<br/>      permission_sets:<br/>        - <permission-set-name></pre> | <pre>map(map(map(object({<br/>    permission_sets = list(string)<br/>    }<br/>  ))))</pre> | `{}` | no |
+| <a name="input_account_map_component_name"></a> [account\_map\_component\_name](#input\_account\_map\_component\_name) | The name of the account-map component | `string` | `"account-map"` | no |
 | <a name="input_additional_tag_map"></a> [additional\_tag\_map](#input\_additional\_tag\_map) | Additional key-value pairs to add to each map in `tags_as_list_of_maps`. Not added to `tags` or `id`.<br/>This is for some rare cases where resources want additional configuration of tags<br/>and therefore take a list of maps with tag key, value, and additional configuration. | `map(string)` | `{}` | no |
 | <a name="input_attributes"></a> [attributes](#input\_attributes) | ID element. Additional attributes (e.g. `workers` or `cluster`) to add to `id`,<br/>in the order they appear in the list. New attributes are appended to the<br/>end of the list. The elements of the list are joined by the `delimiter`<br/>and treated as a single ID element. | `list(string)` | `[]` | no |
 | <a name="input_aws_teams_accessible"></a> [aws\_teams\_accessible](#input\_aws\_teams\_accessible) | List of IAM roles (e.g. ["admin", "terraform"]) for which to create permission<br/>sets that allow the user to assume that role. Named like<br/>admin -> IdentityAdminTeamAccess | `set(string)` | `[]` | no |
@@ -272,6 +273,7 @@ components:
 | <a name="input_stage"></a> [stage](#input\_stage) | ID element. Usually used to indicate role, e.g. 'prod', 'staging', 'source', 'build', 'test', 'deploy', 'release' | `string` | `null` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | Additional tags (e.g. `{'BusinessUnit': 'XYZ'}`).<br/>Neither the tag keys nor the tag values will be modified by this module. | `map(string)` | `{}` | no |
 | <a name="input_tenant"></a> [tenant](#input\_tenant) | ID element \_(Rarely used, not included by default)\_. A customer identifier, indicating who this instance of a resource is for | `string` | `null` | no |
+| <a name="input_tfstate_backend_component_name"></a> [tfstate\_backend\_component\_name](#input\_tfstate\_backend\_component\_name) | The name of the tfstate-backend component | `string` | `"tfstate-backend"` | no |
 | <a name="input_tfstate_environment_name"></a> [tfstate\_environment\_name](#input\_tfstate\_environment\_name) | The name of the environment where `tfstate-backend` is provisioned. If not set, the TerraformUpdateAccess permission set will not be created. | `string` | `null` | no |
 
 ## Outputs
