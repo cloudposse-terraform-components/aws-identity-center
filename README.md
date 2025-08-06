@@ -116,10 +116,10 @@ following structure:
 
 The `identity_roles_accessible` element provides a list of role names corresponding to roles created in the
 `iam-primary-roles` component. For each named role, a corresponding permission set will be created which allows the user
-to assume that role. The permission set name is generated in Terraform from the role name using this statement:
+to assume that role. The permission set name is generated in Terraform from the role name using a statement like this one:
 
 ```
-format("Identity%sTeamAccess", replace(title(role), "-", ""))
+format("Identity%sTeamAccess", replace(title(replace(team, "_", "-")), "-", ""))
 ```
 
 ### Defining a new permission set
