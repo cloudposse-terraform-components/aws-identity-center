@@ -13,7 +13,6 @@ is, assigning IdP (Okta) groups and/or users to AWS SSO permission sets in speci
 
 This component assumes that AWS SSO has already been enabled via the AWS Console (there isn't terraform or AWS CLI
 support for this currently) and that the IdP has been configured to sync users and groups to AWS SSO.
-
 ## Usage
 
 ### Clickops
@@ -97,10 +96,10 @@ following structure:
 
 The `identity_roles_accessible` element provides a list of role names corresponding to roles created in the
 `iam-primary-roles` component. For each named role, a corresponding permission set will be created which allows the user
-to assume that role. The permission set name is generated in Terraform from the role name using this statement:
+to assume that role. The permission set name is generated in Terraform from the role name using a statement like this one:
 
 ```
-format("Identity%sTeamAccess", replace(title(role), "-", ""))
+format("Identity%sTeamAccess", replace(title(replace(team, "_", "-")), "-", ""))
 ```
 
 ### Defining a new permission set
@@ -204,7 +203,53 @@ components:
 ```
 
 <!-- prettier-ignore-start -->
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- prettier-ignore-end -->
+
+[<img src="https://cloudposse.com/logo-300x69.svg" height="32" align="right"/>][40]
+
+[1]: https://docs.aws.amazon.com/singlesignon/latest/userguide/permissionsetsconcept.html
+[2]: #requirement%5C_terraform
+[3]: #requirement%5C_aws
+[4]: #requirement%5C_external
+[5]: #requirement%5C_local
+[6]: #requirement%5C_template
+[7]: #requirement%5C_utils
+[8]: #provider%5C_aws
+[9]: #module%5C_account%5C_map
+[10]: #module%5C_permission%5C_sets
+[11]: #module%5C_role%5C_prefix
+[12]: #module%5C_sso%5C_account%5C_assignments
+[13]: #module%5C_this
+[14]: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document
+[15]: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document
+[16]: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document
+[17]: #input%5C_account%5C_assignments
+[18]: #input%5C_additional%5C_tag%5C_map
+[19]: #input%5C_attributes
+[20]: #input%5C_context
+[21]: #input%5C_delimiter
+[22]: #input%5C_enabled
+[23]: #input%5C_environment
+[24]: #input%5C_global%5C_environment%5C_name
+[25]: #input%5C_iam%5C_primary%5C_roles%5C_stage%5C_name
+[26]: #input%5C_id%5C_length%5C_limit
+[27]: #input%5C_identity%5C_roles%5C_accessible
+[28]: #input%5C_label%5C_key%5C_case
+[29]: #input%5C_label%5C_order
+[30]: #input%5C_label%5C_value%5C_case
+[31]: #input%5C_name
+[32]: #input%5C_namespace
+[33]: #input%5C_privileged
+[34]: #input%5C_regex%5C_replace%5C_chars
+[35]: #input%5C_region
+[36]: #input%5C_root%5C_account%5C_stage%5C_name
+[37]: #input%5C_stage
+[38]: #input%5C_tags
+[39]: https://github.com/cloudposse/terraform-aws-sso
+[40]: https://cpco.io/component
+
+
+<!-- markdownlint-disable -->
 ## Requirements
 
 | Name | Version |
@@ -283,54 +328,17 @@ components:
 | <a name="output_group_ids"></a> [group\_ids](#output\_group\_ids) | Group IDs created for Identity Center |
 | <a name="output_permission_sets"></a> [permission\_sets](#output\_permission\_sets) | Permission sets |
 | <a name="output_sso_account_assignments"></a> [sso\_account\_assignments](#output\_sso\_account\_assignments) | SSO account assignments |
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
-<!-- prettier-ignore-end -->
+<!-- markdownlint-restore -->
+
+
 
 ## References
 
-- [cloudposse/terraform-aws-sso][39]
 
-[<img src="https://cloudposse.com/logo-300x69.svg" height="32" align="right"/>][40]
+- [cloudposse/terraform-aws-sso](https://github.com/cloudposse/terraform-aws-sso) - 
 
-[1]: https://docs.aws.amazon.com/singlesignon/latest/userguide/permissionsetsconcept.html
-[2]: #requirement%5C_terraform
-[3]: #requirement%5C_aws
-[4]: #requirement%5C_external
-[5]: #requirement%5C_local
-[6]: #requirement%5C_template
-[7]: #requirement%5C_utils
-[8]: #provider%5C_aws
-[9]: #module%5C_account%5C_map
-[10]: #module%5C_permission%5C_sets
-[11]: #module%5C_role%5C_prefix
-[12]: #module%5C_sso%5C_account%5C_assignments
-[13]: #module%5C_this
-[14]: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document
-[15]: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document
-[16]: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document
-[17]: #input%5C_account%5C_assignments
-[18]: #input%5C_additional%5C_tag%5C_map
-[19]: #input%5C_attributes
-[20]: #input%5C_context
-[21]: #input%5C_delimiter
-[22]: #input%5C_enabled
-[23]: #input%5C_environment
-[24]: #input%5C_global%5C_environment%5C_name
-[25]: #input%5C_iam%5C_primary%5C_roles%5C_stage%5C_name
-[26]: #input%5C_id%5C_length%5C_limit
-[27]: #input%5C_identity%5C_roles%5C_accessible
-[28]: #input%5C_label%5C_key%5C_case
-[29]: #input%5C_label%5C_order
-[30]: #input%5C_label%5C_value%5C_case
-[31]: #input%5C_name
-[32]: #input%5C_namespace
-[33]: #input%5C_privileged
-[34]: #input%5C_regex%5C_replace%5C_chars
-[35]: #input%5C_region
-[36]: #input%5C_root%5C_account%5C_stage%5C_name
-[37]: #input%5C_stage
-[38]: #input%5C_tags
-[39]: https://github.com/cloudposse/terraform-aws-sso
-[40]: https://cpco.io/component
+
+
 
 [<img src="https://cloudposse.com/logo-300x69.svg" height="32" align="right"/>](https://cpco.io/homepage?utm_source=github&utm_medium=readme&utm_campaign=cloudposse-terraform-components/aws-identity-center&utm_content=)
+
