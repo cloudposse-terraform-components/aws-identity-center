@@ -34,11 +34,16 @@ data "aws_iam_policy_document" "terraform_update_access" {
       "${module.tfstate.outputs.tfstate_backend_s3_bucket_arn}/*"
     ] : []
   }
-  statement {
-    sid       = "TerraformStateBackendDynamoDbTable"
-    effect    = "Allow"
-    actions   = ["dynamodb:GetItem", "dynamodb:PutItem", "dynamodb:DeleteItem"]
-    resources = module.this.enabled ? [module.tfstate.outputs.tfstate_backend_dynamodb_table_arn] : []
+
+  dynamic "statement" {
+    for_each = (module.this.enabled && module.tfstate.outputs.tfstate_backend_dynamodb_table_arn != "") ? [1] : []
+
+    content {
+      sid       = "TerraformStateBackendDynamoDbTable"
+      effect    = "Allow"
+      actions   = ["dynamodb:GetItem", "dynamodb:PutItem", "dynamodb:DeleteItem"]
+      resources = [module.tfstate.outputs.tfstate_backend_dynamodb_table_arn]
+    }
   }
 }
 
