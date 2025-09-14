@@ -43,6 +43,7 @@ module "role_map" {
 
   teams      = var.aws_teams_accessible
   privileged = var.privileged
+  overridable_team_permission_set_name_pattern = var.overridable_team_permission_set_name_pattern
 
   context = module.this.context
 }

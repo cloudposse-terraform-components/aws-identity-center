@@ -70,3 +70,10 @@ variable "account_map_component_name" {
   description = "The name of the account-map component"
   default     = "account-map"
 }
+
+variable "overridable_team_permission_set_name_pattern" {
+  type        = string
+  description = "The pattern used to generate the AWS SSO PermissionSet name for each team"
+  default     = "Identity%sTeamAccess"
+}
+
