@@ -41,8 +41,8 @@ data "aws_iam_policy_document" "assume_aws_team" {
 module "role_map" {
   source = "../account-map/modules/roles-to-principals"
 
-  teams      = var.aws_teams_accessible
-  privileged = var.privileged
+  teams                                        = var.aws_teams_accessible
+  privileged                                   = var.privileged
   overridable_team_permission_set_name_pattern = var.overridable_team_permission_set_name_pattern
 
   context = module.this.context
