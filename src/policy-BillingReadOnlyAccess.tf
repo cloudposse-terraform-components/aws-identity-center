@@ -3,7 +3,7 @@ locals {
     name             = "BillingReadOnlyAccess",
     description      = "Allow users to view bills in the billing console",
     relay_state      = "",
-    session_duration = "",
+    session_duration = var.session_duration,
     tags             = {},
     inline_policy    = ""
     policy_attachments = [

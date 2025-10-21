@@ -3,7 +3,7 @@ locals {
     name             = "ReadOnlyAccess",
     description      = "Allow Read Only access to the account",
     relay_state      = "",
-    session_duration = "",
+    session_duration = var.session_duration,
     tags             = {},
     inline_policy    = data.aws_iam_policy_document.eks_read_only.json,
     policy_attachments = [

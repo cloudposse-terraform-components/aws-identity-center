@@ -3,7 +3,7 @@ locals {
     name             = "BillingAdministratorAccess",
     description      = "Grants permissions for billing and cost management. This includes viewing account usage and viewing and modifying budgets and payment methods.",
     relay_state      = "https://console.aws.amazon.com/billing/",
-    session_duration = "",
+    session_duration = var.session_duration,
     tags             = {},
     inline_policy    = ""
     policy_attachments = [
