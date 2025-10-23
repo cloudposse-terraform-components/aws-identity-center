@@ -77,3 +77,8 @@ variable "overridable_team_permission_set_name_pattern" {
   default     = "Identity%sTeamAccess"
 }
 
+variable "provision_sensible_permission_sets" {
+  type        = bool
+  description = "Provision sensible defaults for the AWS SSO PermissionSet"
+  default     = true
+}
