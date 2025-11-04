@@ -53,7 +53,7 @@ locals {
     description                         = "Allow access to Terraform state sufficient to make changes",
     relay_state                         = "",
     session_duration                    = var.session_duration,
-    tags                                = {},
+    tags                                = module.this.tags,
     inline_policy                       = one(data.aws_iam_policy_document.terraform_update_access[*].json),
     policy_attachments                  = []
     customer_managed_policy_attachments = []

@@ -54,7 +54,7 @@ locals {
     description                         = format("Allow user to assume the %s Team role in the Identity account, which allows access to other accounts", replace(title(role), "-", ""))
     relay_state                         = "",
     session_duration                    = var.session_duration,
-    tags                                = {},
+    tags                                = module.this.tags,
     inline_policy                       = data.aws_iam_policy_document.assume_aws_team[role].json
     policy_attachments                  = ["arn:${local.aws_partition}:iam::aws:policy/job-function/ViewOnlyAccess"]
     customer_managed_policy_attachments = []

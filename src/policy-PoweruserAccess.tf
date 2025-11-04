@@ -4,7 +4,7 @@ locals {
     description      = "Allow Poweruser access to the account",
     relay_state      = "",
     session_duration = var.session_duration,
-    tags             = {},
+    tags             = module.this.tags,
     inline_policy    = ""
     policy_attachments = [
       "arn:${local.aws_partition}:iam::aws:policy/PowerUserAccess",
