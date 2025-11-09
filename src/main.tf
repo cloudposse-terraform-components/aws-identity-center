@@ -79,14 +79,16 @@ module "permission_sets" {
 
   permission_sets = concat(
     local.overridable_additional_permission_sets,
-    local.administrator_access_permission_set,
-    local.billing_administrator_access_permission_set,
-    local.billing_read_only_access_permission_set,
-    local.dns_administrator_access_permission_set,
     local.identity_access_permission_sets,
-    local.poweruser_access_permission_set,
-    local.read_only_access_permission_set,
     local.terraform_update_access_permission_set,
+    var.provision_sensible_permission_sets ? concat(
+      local.administrator_access_permission_set,
+      local.billing_administrator_access_permission_set,
+      local.billing_read_only_access_permission_set,
+      local.dns_administrator_access_permission_set,
+      local.poweruser_access_permission_set,
+      local.read_only_access_permission_set
+    ) : []
   )
 
   context = module.this.context
