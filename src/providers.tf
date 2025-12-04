@@ -73,3 +73,30 @@ module "iam_roles" {
 
   context = module.this.context
 }
+
+provider "aws" {
+  alias  = "root"
+  region = var.region
+
+  profile = !var.privileged && module.iam_roles_root.profiles_enabled ? module.iam_roles_root.terraform_profile_name : null
+  dynamic "assume_role" {
+    for_each = !var.privileged && module.iam_roles_root.profiles_enabled ? [] : (
+      var.privileged ? compact([module.iam_roles_root.org_role_arn]) : compact([module.iam_roles_root.terraform_role_arn])
+    )
+    content {
+      role_arn = assume_role.value
+    }
+  }
+}
+
+
+module "iam_roles_root" {
+  source = "../account-map/modules/iam-roles"
+
+  privileged  = var.privileged
+  tenant      = module.iam_roles.global_tenant_name
+  stage       = module.iam_roles.global_stage_name
+  environment = module.iam_roles.global_environment_name
+
+  context = module.this.context
+}
