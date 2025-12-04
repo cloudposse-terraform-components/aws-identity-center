@@ -1,9 +1,10 @@
 locals {
   enabled = module.this.enabled
 
-  # Use remote state outputs when account_map_enabled is true, otherwise use static variable
-  account_map  = var.account_map_enabled ? module.account_map.outputs.full_account_map : var.account_map.full_account_map
-  root_account = local.account_map[var.account_map_enabled ? module.account_map.outputs.root_account_account_name : var.account_map.root_account_account_name]
+  # module.account_map.outputs provides values from either remote state (when enabled)
+  # or from the static var.account_map defaults (when bypassed)
+  account_map  = module.account_map.outputs.full_account_map
+  root_account = local.account_map[module.account_map.outputs.root_account_account_name]
 
   account_assignments_groups = flatten([
     for account_key, account in var.account_assignments : [
