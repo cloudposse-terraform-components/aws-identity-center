@@ -77,3 +77,12 @@ variable "overridable_team_permission_set_name_pattern" {
   default     = "Identity%sTeamAccess"
 }
 
+variable "idp_groups" {
+  type        = list(string)
+  description = <<-EOT
+    List of IdP group names to look up and include in the group_ids output.
+    These groups are managed by your Identity Provider (e.g., Google Workspace, Okta)
+    and synced to AWS Identity Center. This allows referencing their IDs in other components.
+    EOT
+  default     = []
+}

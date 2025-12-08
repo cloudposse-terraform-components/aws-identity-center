@@ -9,6 +9,9 @@ output "sso_account_assignments" {
 }
 
 output "group_ids" {
-  value       = { for group_key, group_output in aws_identitystore_group.manual : group_key => group_output.group_id }
-  description = "Group IDs created for Identity Center"
+  value = merge(
+    { for group_key, group_output in aws_identitystore_group.manual : group_key => group_output.group_id },
+    { for group_key, group_output in data.aws_identitystore_group.idp : group_key => group_output.group_id }
+  )
+  description = "Group IDs for Identity Center (includes both manually created and IdP-synced groups)"
 }

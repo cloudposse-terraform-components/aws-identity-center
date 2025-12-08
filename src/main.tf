@@ -1,6 +1,8 @@
 locals {
   enabled = module.this.enabled
 
+  # module.account_map.outputs provides values from either remote state (when enabled)
+  # or from the static var.account_map defaults (when bypassed)
   account_map  = module.account_map.outputs.full_account_map
   root_account = local.account_map[module.account_map.outputs.root_account_account_name]
 
@@ -73,6 +75,20 @@ resource "aws_identitystore_group" "manual" {
   identity_store_id = tolist(data.aws_ssoadmin_instances.this.identity_store_ids)[0]
 }
 
+# Look up IdP-managed groups (synced from Google Workspace, Okta, etc.)
+data "aws_identitystore_group" "idp" {
+  for_each = toset(var.idp_groups)
+
+  identity_store_id = tolist(data.aws_ssoadmin_instances.this.identity_store_ids)[0]
+
+  alternate_identifier {
+    unique_attribute {
+      attribute_path  = "DisplayName"
+      attribute_value = each.key
+    }
+  }
+}
+
 module "permission_sets" {
   source  = "cloudposse/sso/aws//modules/permission-sets"
   version = "1.2.0"
@@ -86,6 +102,9 @@ module "permission_sets" {
     local.identity_access_permission_sets,
     local.poweruser_access_permission_set,
     local.read_only_access_permission_set,
+    local.root_access_permission_set,
+    local.terraform_plan_access_permission_set,
+    local.terraform_apply_access_permission_set,
     local.terraform_update_access_permission_set,
   )
 

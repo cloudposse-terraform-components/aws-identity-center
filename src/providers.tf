@@ -1,3 +1,30 @@
+variable "account_map_enabled" {
+  type        = bool
+  description = <<-EOT
+    When true, uses the account-map component to look up account IDs dynamically.
+    When false, uses the static account_map variable instead. Set to false when
+    using Atmos Auth profiles and static account mappings.
+    EOT
+  default     = true
+}
+
+variable "account_map" {
+  type = object({
+    full_account_map           = map(string)
+    audit_account_account_name = optional(string, "")
+    root_account_account_name  = optional(string, "")
+  })
+  description = <<-EOT
+    Static account map used when account_map_enabled is false.
+    Provides account name to account ID mapping without requiring the account-map component.
+    EOT
+  default = {
+    full_account_map           = {}
+    audit_account_account_name = ""
+    root_account_account_name  = ""
+  }
+}
+
 # This component is unusual in that part of it must be deployed to the `root`
 # account. You have the option of where to deploy the remaining part, and
 # Cloud Posse recommends you deploy it also to the `root` account, however
