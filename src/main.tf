@@ -106,6 +106,7 @@ module "permission_sets" {
     local.terraform_plan_access_permission_set,
     local.terraform_apply_access_permission_set,
     local.terraform_update_access_permission_set,
+    local.terraform_state_access_permission_set,
   )
 
   context = module.this.context
