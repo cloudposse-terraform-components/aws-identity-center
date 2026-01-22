@@ -190,6 +190,126 @@ format("Identity%sTeamAccess", replace(title(replace(team, "_", "-")), "-", ""))
 7. If you want the permission set to be able to use Terraform, enable access to the Terraform state read/write (default)
   role in `tfstate-backend`.
 
+### Using Mixins
+
+Mixins provide a way to extend the component with additional permission sets without modifying the core component code.
+This makes it easier to keep your components up-to-date with upstream changes while maintaining custom functionality.
+
+#### Available Mixins
+
+This component provides several mixins in the [`mixins/`](./mixins) directory:
+
+- **`policy-PartnerCentral.tf`** - AWS Partner Central permission sets for AWS Partner Network (APN) integration
+
+See the [mixins/README.md](./mixins/README.md) for a complete list of available mixins and detailed documentation.
+
+#### Vendoring Mixins
+
+**Option 1: Via component.yaml (Recommended)**
+
+Add the mixin to your component's `component.yaml` file:
+
+```yaml
+# components/terraform/aws-sso/component.yaml
+apiVersion: atmos/v1
+kind: ComponentVendorConfig
+spec:
+  source:
+    uri: github.com/cloudposse-terraform-components/aws-identity-center.git//src?ref={{ .Version }}
+    version: 1.0.0
+    included_paths:
+      - "**/**"
+    excluded_paths: []
+
+  # Mixins are pulled and merged into your component directory
+  mixins:
+    - uri: github.com/cloudposse-terraform-components/aws-identity-center.git//mixins/policy-PartnerCentral.tf?ref={{ .Version }}
+      version: 1.0.0
+      filename: policy-PartnerCentral.tf
+```
+
+**Option 2: Via vendor.yaml**
+
+Use a centralized `vendor.yaml` file:
+
+```yaml
+# vendor.yaml
+apiVersion: atmos/v1
+kind: AtmosVendorConfig
+spec:
+  sources:
+    - component: "terraform/aws-sso"
+      source: "github.com/cloudposse-terraform-components/aws-identity-center.git//src?ref={{ .Version }}"
+      version: "1.0.0"
+      targets:
+        - "components/terraform/aws-sso"
+      mixins:
+        - source: "github.com/cloudposse-terraform-components/aws-identity-center.git//mixins/policy-PartnerCentral.tf?ref={{ .Version }}"
+          version: "1.0.0"
+          filename: "policy-PartnerCentral.tf"
+```
+
+Then run:
+```bash
+atmos vendor pull -c aws-sso
+```
+
+#### Activating Vendored Permission Sets
+
+After vendoring a mixin, include the permission sets in your component by updating `additional-permission-sets_override.tf`:
+
+```hcl
+# components/terraform/aws-sso/additional-permission-sets_override.tf
+locals {
+  # Add custom permission sets.
+  # Mixins define local variables (e.g., local.partner_central_permission_sets)
+  # that you concatenate into this list.
+  overridable_additional_permission_sets = concat(
+    local.partner_central_permission_sets,  # From policy-PartnerCentral.tf mixin
+    # Add other permission set locals here as needed
+    # local.custom_permission_sets,
+  )
+}
+```
+
+Each mixin defines a local variable containing its permission sets. For example, `policy-PartnerCentral.tf` defines
+`local.partner_central_permission_sets` with 8 permission sets for AWS Partner Central.
+
+#### Creating Custom Mixins
+
+You can create your own mixin files following this pattern:
+
+```hcl
+# components/terraform/aws-sso/policy-CustomRole.tf
+locals {
+  custom_permission_sets = [
+    {
+      name                                = "MyCustomRole"
+      description                         = "Description of the role"
+      relay_state                         = ""
+      session_duration                    = ""
+      tags                                = {}
+      inline_policy                       = ""
+      policy_attachments                  = ["arn:${local.aws_partition}:iam::aws:policy/CustomPolicy"]
+      customer_managed_policy_attachments = []
+    },
+  ]
+}
+```
+
+Then reference it in `additional-permission-sets_override.tf`:
+
+```hcl
+locals {
+  overridable_additional_permission_sets = concat(
+    local.custom_permission_sets,
+    local.partner_central_permission_sets,
+  )
+}
+```
+
+For more details, see [mixins/README.md](./mixins/README.md).
+
 #### Example
 
 The example snippet below shows how to use this module with various combinations (plain YAML, YAML Anchors and a
