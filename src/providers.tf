@@ -2,8 +2,12 @@
 
 variable "account_map_enabled" {
   type        = bool
-  description = "Enable the account map component"
-  default     = false
+  description = <<-EOT
+    When true, uses the account-map component to look up account IDs dynamically.
+    When false, uses the static account_map variable instead. Set to false when
+    using Atmos Auth profiles and static account mappings.
+    EOT
+  default     = true
 }
 
 variable "account_map" {
