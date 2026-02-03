@@ -37,5 +37,6 @@ provider "aws" {
 # dummy module to satisfy the module dependency
 module "iam_roles" {
   source  = "cloudposse/label/null"
+  version = "0.25.0"
   context = module.this.context
 }
