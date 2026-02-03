@@ -9,6 +9,25 @@ description: |-
   This component assumes that AWS SSO has already been enabled via the AWS Console (there isn't terraform or AWS CLI
   support for this currently) and that the IdP has been configured to sync users and groups to AWS SSO.
 usage: |-
+  ### Migration from v1.x
+
+  Version 2.0.0 introduces breaking changes. See [src/MIGRATION.md](./src/MIGRATION.md) for detailed migration instructions.
+
+  Key changes:
+  - Removed `aws.root` provider - deploy directly to root account instead of delegating to identity
+  - Removed `sso_account_assignments_root` module
+  - Moved policy files (`policy-TerraformUpdateAccess.tf`, `policy-Identity-role-TeamAccess.tf`) to mixins
+  - Added static account map support via `account_map_enabled` variable
+
+  ### Static Account Map Support
+
+  This component supports two modes for account ID resolution:
+
+  - **`account_map_enabled = true`** (default): Uses the `account-map` component to look up account IDs dynamically via remote state
+  - **`account_map_enabled = false`**: Uses the static `account_map` variable, eliminating the dependency on the `account-map` component
+
+  For most deployments, we recommend using static account mappings (`account_map_enabled: false`) for simplicity.
+
   ### Clickops
 
   1. Go to root admin account
@@ -86,15 +105,19 @@ usage: |-
     component. The definition includes the name of the permission set. See
     `components/terraform/aws-sso/policy-AdminstratorAccess.tf` for an example.
 
-  #### `identity_roles_accessible`
+  #### `identity_roles_accessible` (via mixin)
 
-  The `identity_roles_accessible` element provides a list of role names corresponding to roles created in the
+  > **Note:** This feature has been moved to a mixin in v2.0.0. To use it, vendor the `policy-Identity-role-TeamAccess.tf` mixin.
+
+  The `aws_teams_accessible` variable (when using the mixin) provides a list of role names corresponding to roles created in the
   `iam-primary-roles` component. For each named role, a corresponding permission set will be created which allows the user
   to assume that role. The permission set name is generated in Terraform from the role name using a statement like this one:
 
   ```
   format("Identity%sTeamAccess", replace(title(replace(team, "_", "-")), "-", ""))
   ```
+
+  See [mixins/README.md](./mixins/README.md) for details on vendoring this mixin.
 
   ### Defining a new permission set
 
@@ -154,6 +177,9 @@ usage: |-
 
   This component provides several mixins in the [`mixins/`](./mixins) directory:
 
+  - **`provider-root.tf`** - AWS root provider alias for migration scenarios (v1.x to v2.x upgrades)
+  - **`policy-TerraformUpdateAccess.tf`** - Permission set for Terraform state access
+  - **`policy-Identity-role-TeamAccess.tf`** - Permission sets for team role assumption
   - **`policy-PartnerCentral.tf`** - AWS Partner Central permission sets for AWS Partner Network (APN) integration
 
   See the [mixins/README.md](./mixins/README.md) for a complete list of available mixins and detailed documentation.
@@ -265,10 +291,49 @@ usage: |-
 
   For more details, see [mixins/README.md](./mixins/README.md).
 
-  #### Example
+  #### Basic Example
 
-  The example snippet below shows how to use this module with various combinations (plain YAML, YAML Anchors and a
-  combination of the two):
+  The basic example shows how to configure the component with static account mappings (recommended for most deployments):
+
+  ```yaml
+  components:
+    terraform:
+      aws-sso:
+        vars:
+          enabled: true
+          account_map_enabled: false
+          account_map:
+            full_account_map:
+              core-root: "111111111111"
+              core-audit: "222222222222"
+              plat-dev: "333333333333"
+              plat-staging: "444444444444"
+              plat-prod: "555555555555"
+            root_account_account_name: "core-root"
+
+          account_assignments:
+            core-root:
+              groups:
+                "Administrators":
+                  permission_sets:
+                    - AdministratorAccess
+                    - TerraformApplyAccess
+            plat-dev:
+              groups:
+                "Developers":
+                  permission_sets:
+                    - AdministratorAccess
+                    - ReadOnlyAccess
+            plat-prod:
+              groups:
+                "Developers":
+                  permission_sets:
+                    - ReadOnlyAccess
+  ```
+
+  #### Advanced Example with YAML Anchors
+
+  The example snippet below shows how to use this module with YAML Anchors for reusable configurations:
 
   ```yaml
   prod-cloud-engineers: &prod-cloud-engineers
@@ -281,16 +346,24 @@ usage: |-
     terraform:
       aws-sso:
         vars:
+          enabled: true
+          account_map_enabled: false
+          account_map:
+            full_account_map:
+              core-root: "111111111111"
+              core-audit: "222222222222"
+              plat-dev: "333333333333"
+              plat-prod: "444444444444"
+            root_account_account_name: "core-root"
+
           account_assignments:
-            audit:
+            core-audit:
               groups:
                 <<: *prod-cloud-engineers
                 Production Cloud Engineers:
                   permission_sets:
                     - ReadOnlyAccess
-            corp:
-              groups: *prod-cloud-engineers
-            prod:
+            plat-prod:
               groups:
                 Administrators:
                   permission_sets:
@@ -299,7 +372,7 @@ usage: |-
                 Developers:
                   permission_sets:
                     - ReadOnlyAccess
-            dev:
+            plat-dev:
               groups:
                 Administrators:
                   permission_sets:
@@ -309,11 +382,6 @@ usage: |-
                   permission_sets:
                     - AdministratorAccess
                     - ReadOnlyAccess
-          aws_teams_accessible:
-            - "developers"
-            - "devops"
-            - "managers"
-            - "support"
   ```
 
   <!-- prettier-ignore-start -->
