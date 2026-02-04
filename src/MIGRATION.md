@@ -172,6 +172,18 @@ locals {
 }
 ```
 
+**Important:** When using the `TerraformUpdateAccess` mixin, you must configure the terraform state variables in your stack configuration:
+
+```yaml
+components:
+  terraform:
+    aws-sso:
+      vars:
+        tfstate_environment_name: "usw1"
+        tf_access_bucket_arn: !terraform.state tfstate-backend core-usw1-root tfstate_backend_s3_bucket_arn
+        tf_access_role_arn: !terraform.state tfstate-backend core-usw1-root tfstate_backend_access_role_arns["acme-core-gbl-root-tfstate"]
+```
+
 ## Troubleshooting
 
 ### "Provider configuration not present" Error

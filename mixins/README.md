@@ -36,6 +36,20 @@ Provides a permission set for Terraform state access, allowing users to make cha
 **Permission Set:**
 - `TerraformUpdateAccess` - S3 and DynamoDB access for Terraform state operations
 
+**Stack Configuration Example:**
+
+When using this mixin, configure the terraform state variables in your stack:
+
+```yaml
+components:
+  terraform:
+    aws-sso:
+      vars:
+        tfstate_environment_name: "usw1"
+        tf_access_bucket_arn: !terraform.state tfstate-backend core-usw1-root tfstate_backend_s3_bucket_arn
+        tf_access_role_arn: !terraform.state tfstate-backend core-usw1-root tfstate_backend_access_role_arns["acme-core-gbl-root-tfstate"]
+```
+
 ### `policy-Identity-role-TeamAccess.tf`
 
 Generates permission sets for each team role, allowing users to assume team roles in the Identity account.
