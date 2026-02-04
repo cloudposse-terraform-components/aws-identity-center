@@ -15,6 +15,25 @@ This component assumes that AWS SSO has already been enabled via the AWS Console
 support for this currently) and that the IdP has been configured to sync users and groups to AWS SSO.
 ## Usage
 
+### Migration from v1.x
+
+Version 2.0.0 introduces breaking changes. See [src/MIGRATION.md](./src/MIGRATION.md) for detailed migration instructions.
+
+Key changes:
+- Removed `aws.root` provider - deploy directly to root account instead of delegating to identity
+- Removed `sso_account_assignments_root` module
+- Moved policy files (`policy-TerraformUpdateAccess.tf`, `policy-Identity-role-TeamAccess.tf`) to mixins
+- Added static account map support via `account_map_enabled` variable
+
+### Static Account Map Support
+
+This component supports two modes for account ID resolution:
+
+- **`account_map_enabled = true`** (default): Uses the `account-map` component to look up account IDs dynamically via remote state
+- **`account_map_enabled = false`**: Uses the static `account_map` variable, eliminating the dependency on the `account-map` component
+
+For most deployments, we recommend using static account mappings (`account_map_enabled: false`) for simplicity.
+
 ### Clickops
 
 1. Go to root admin account
@@ -92,15 +111,19 @@ following structure:
   component. The definition includes the name of the permission set. See
   `components/terraform/aws-sso/policy-AdminstratorAccess.tf` for an example.
 
-#### `identity_roles_accessible`
+#### `identity_roles_accessible` (via mixin)
 
-The `identity_roles_accessible` element provides a list of role names corresponding to roles created in the
+> **Note:** This feature has been moved to a mixin in v2.0.0. To use it, vendor the `policy-Identity-role-TeamAccess.tf` mixin.
+
+The `aws_teams_accessible` variable (when using the mixin) provides a list of role names corresponding to roles created in the
 `iam-primary-roles` component. For each named role, a corresponding permission set will be created which allows the user
 to assume that role. The permission set name is generated in Terraform from the role name using a statement like this one:
 
-```
+```hcl
 format("Identity%sTeamAccess", replace(title(replace(team, "_", "-")), "-", ""))
 ```
+
+See [mixins/README.md](./mixins/README.md) for details on vendoring this mixin.
 
 ### Defining a new permission set
 
@@ -160,6 +183,9 @@ This makes it easier to keep your components up-to-date with upstream changes wh
 
 This component provides several mixins in the [`mixins/`](./mixins) directory:
 
+- **`provider-root.tf`** - AWS root provider alias for migration scenarios (v1.x to v2.x upgrades)
+- **`policy-TerraformUpdateAccess.tf`** - Permission set for Terraform state access
+- **`policy-Identity-role-TeamAccess.tf`** - Permission sets for team role assumption
 - **`policy-PartnerCentral.tf`** - AWS Partner Central permission sets for AWS Partner Network (APN) integration
 
 See the [mixins/README.md](./mixins/README.md) for a complete list of available mixins and detailed documentation.
@@ -271,10 +297,49 @@ locals {
 
 For more details, see [mixins/README.md](./mixins/README.md).
 
-#### Example
+#### Basic Example
 
-The example snippet below shows how to use this module with various combinations (plain YAML, YAML Anchors and a
-combination of the two):
+The basic example shows how to configure the component with static account mappings (recommended for most deployments):
+
+```yaml
+components:
+  terraform:
+    aws-sso:
+      vars:
+        enabled: true
+        account_map_enabled: false
+        account_map:
+          full_account_map:
+            core-root: "111111111111"
+            core-audit: "222222222222"
+            plat-dev: "333333333333"
+            plat-staging: "444444444444"
+            plat-prod: "555555555555"
+          root_account_account_name: "core-root"
+
+        account_assignments:
+          core-root:
+            groups:
+              "Administrators":
+                permission_sets:
+                  - AdministratorAccess
+                  - TerraformApplyAccess
+          plat-dev:
+            groups:
+              "Developers":
+                permission_sets:
+                  - AdministratorAccess
+                  - ReadOnlyAccess
+          plat-prod:
+            groups:
+              "Developers":
+                permission_sets:
+                  - ReadOnlyAccess
+```
+
+#### Advanced Example with YAML Anchors
+
+The example snippet below shows how to use this module with YAML Anchors for reusable configurations:
 
 ```yaml
 prod-cloud-engineers: &prod-cloud-engineers
@@ -287,16 +352,24 @@ components:
   terraform:
     aws-sso:
       vars:
+        enabled: true
+        account_map_enabled: false
+        account_map:
+          full_account_map:
+            core-root: "111111111111"
+            core-audit: "222222222222"
+            plat-dev: "333333333333"
+            plat-prod: "444444444444"
+          root_account_account_name: "core-root"
+
         account_assignments:
-          audit:
+          core-audit:
             groups:
               <<: *prod-cloud-engineers
               Production Cloud Engineers:
                 permission_sets:
                   - ReadOnlyAccess
-          corp:
-            groups: *prod-cloud-engineers
-          prod:
+          plat-prod:
             groups:
               Administrators:
                 permission_sets:
@@ -305,7 +378,7 @@ components:
               Developers:
                 permission_sets:
                   - ReadOnlyAccess
-          dev:
+          plat-dev:
             groups:
               Administrators:
                 permission_sets:
@@ -315,11 +388,6 @@ components:
                 permission_sets:
                   - AdministratorAccess
                   - ReadOnlyAccess
-        aws_teams_accessible:
-          - "developers"
-          - "devops"
-          - "managers"
-          - "support"
 ```
 
 <!-- prettier-ignore-start -->
@@ -388,13 +456,9 @@ components:
 | Name | Source | Version |
 |------|--------|---------|
 | <a name="module_account_map"></a> [account\_map](#module\_account\_map) | cloudposse/stack-config/yaml//modules/remote-state | 1.8.0 |
-| <a name="module_iam_roles"></a> [iam\_roles](#module\_iam\_roles) | ../account-map/modules/iam-roles | n/a |
-| <a name="module_iam_roles_root"></a> [iam\_roles\_root](#module\_iam\_roles\_root) | ../account-map/modules/iam-roles | n/a |
+| <a name="module_iam_roles"></a> [iam\_roles](#module\_iam\_roles) | cloudposse/label/null | 0.25.0 |
 | <a name="module_permission_sets"></a> [permission\_sets](#module\_permission\_sets) | cloudposse/sso/aws//modules/permission-sets | 1.2.0 |
-| <a name="module_role_map"></a> [role\_map](#module\_role\_map) | ../account-map/modules/roles-to-principals | n/a |
 | <a name="module_sso_account_assignments"></a> [sso\_account\_assignments](#module\_sso\_account\_assignments) | cloudposse/sso/aws//modules/account-assignments | 1.2.0 |
-| <a name="module_sso_account_assignments_root"></a> [sso\_account\_assignments\_root](#module\_sso\_account\_assignments\_root) | cloudposse/sso/aws//modules/account-assignments | 1.2.0 |
-| <a name="module_tfstate"></a> [tfstate](#module\_tfstate) | cloudposse/stack-config/yaml//modules/remote-state | 1.8.0 |
 | <a name="module_this"></a> [this](#module\_this) | cloudposse/label/null | 0.25.0 |
 
 ## Resources
@@ -402,13 +466,11 @@ components:
 | Name | Type |
 |------|------|
 | [aws_identitystore_group.manual](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/identitystore_group) | resource |
-| [aws_iam_policy_document.assume_aws_team](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.dns_administrator_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.eks_read_only](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.terraform_apply_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.terraform_plan_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.terraform_state_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
-| [aws_iam_policy_document.terraform_update_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_identitystore_group.idp](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/identitystore_group) | data source |
 | [aws_partition.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/partition) | data source |
 | [aws_ssoadmin_instances.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssoadmin_instances) | data source |
@@ -418,12 +480,11 @@ components:
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_account_assignments"></a> [account\_assignments](#input\_account\_assignments) | Enables access to permission sets for users and groups in accounts, in the following structure:<pre>yaml<br/><account-name>:<br/>  groups:<br/>    <group-name>:<br/>      permission_sets:<br/>        - <permission-set-name><br/>  users:<br/>    <user-name>:<br/>      permission_sets:<br/>        - <permission-set-name></pre> | <pre>map(map(map(object({<br/>    permission_sets = list(string)<br/>    }<br/>  ))))</pre> | `{}` | no |
-| <a name="input_account_map"></a> [account\_map](#input\_account\_map) | Static account map used when account\_map\_enabled is false.<br/>Provides account name to account ID mapping without requiring the account-map component. | <pre>object({<br/>    full_account_map           = map(string)<br/>    audit_account_account_name = optional(string, "")<br/>    root_account_account_name  = optional(string, "")<br/>  })</pre> | <pre>{<br/>  "audit_account_account_name": "",<br/>  "full_account_map": {},<br/>  "root_account_account_name": ""<br/>}</pre> | no |
+| <a name="input_account_map"></a> [account\_map](#input\_account\_map) | Map of account names (tenant-stage format) to account IDs. Used to verify we're targeting the correct AWS account. Optional attributes support component-specific functionality (e.g., audit\_account\_account\_name for cloudtrail, root\_account\_account\_name for aws-sso). | <pre>object({<br/>    full_account_map              = map(string)<br/>    audit_account_account_name    = optional(string, "")<br/>    root_account_account_name     = optional(string, "")<br/>    identity_account_account_name = optional(string, "")<br/>    aws_partition                 = optional(string, "aws")<br/>    iam_role_arn_templates        = optional(map(string), {})<br/>  })</pre> | <pre>{<br/>  "audit_account_account_name": "",<br/>  "aws_partition": "aws",<br/>  "full_account_map": {},<br/>  "iam_role_arn_templates": {},<br/>  "identity_account_account_name": "",<br/>  "root_account_account_name": ""<br/>}</pre> | no |
 | <a name="input_account_map_component_name"></a> [account\_map\_component\_name](#input\_account\_map\_component\_name) | The name of the account-map component | `string` | `"account-map"` | no |
 | <a name="input_account_map_enabled"></a> [account\_map\_enabled](#input\_account\_map\_enabled) | When true, uses the account-map component to look up account IDs dynamically.<br/>When false, uses the static account\_map variable instead. Set to false when<br/>using Atmos Auth profiles and static account mappings. | `bool` | `true` | no |
 | <a name="input_additional_tag_map"></a> [additional\_tag\_map](#input\_additional\_tag\_map) | Additional key-value pairs to add to each map in `tags_as_list_of_maps`. Not added to `tags` or `id`.<br/>This is for some rare cases where resources want additional configuration of tags<br/>and therefore take a list of maps with tag key, value, and additional configuration. | `map(string)` | `{}` | no |
 | <a name="input_attributes"></a> [attributes](#input\_attributes) | ID element. Additional attributes (e.g. `workers` or `cluster`) to add to `id`,<br/>in the order they appear in the list. New attributes are appended to the<br/>end of the list. The elements of the list are joined by the `delimiter`<br/>and treated as a single ID element. | `list(string)` | `[]` | no |
-| <a name="input_aws_teams_accessible"></a> [aws\_teams\_accessible](#input\_aws\_teams\_accessible) | List of IAM roles (e.g. ["admin", "terraform"]) for which to create permission<br/>sets that allow the user to assume that role. Named like<br/>admin -> IdentityAdminTeamAccess | `set(string)` | `[]` | no |
 | <a name="input_context"></a> [context](#input\_context) | Single object for setting entire context at once.<br/>See description of individual variables for details.<br/>Leave string and numeric variables as `null` to use default value.<br/>Individual variable settings (non-null) override settings in context object,<br/>except for attributes, tags, and additional\_tag\_map, which are merged. | `any` | <pre>{<br/>  "additional_tag_map": {},<br/>  "attributes": [],<br/>  "delimiter": null,<br/>  "descriptor_formats": {},<br/>  "enabled": true,<br/>  "environment": null,<br/>  "id_length_limit": null,<br/>  "label_key_case": null,<br/>  "label_order": [],<br/>  "label_value_case": null,<br/>  "labels_as_tags": [<br/>    "unset"<br/>  ],<br/>  "name": null,<br/>  "namespace": null,<br/>  "regex_replace_chars": null,<br/>  "stage": null,<br/>  "tags": {},<br/>  "tenant": null<br/>}</pre> | no |
 | <a name="input_delimiter"></a> [delimiter](#input\_delimiter) | Delimiter to be used between ID elements.<br/>Defaults to `-` (hyphen). Set to `""` to use no delimiter at all. | `string` | `null` | no |
 | <a name="input_descriptor_formats"></a> [descriptor\_formats](#input\_descriptor\_formats) | Describe additional descriptors to be output in the `descriptors` output map.<br/>Map of maps. Keys are names of descriptors. Values are maps of the form<br/>`{<br/>  format = string<br/>  labels = list(string)<br/>}`<br/>(Type is `any` so the map values can later be enhanced to provide additional options.)<br/>`format` is a Terraform format string to be passed to the `format()` function.<br/>`labels` is a list of labels, in order, to pass to `format()` function.<br/>Label values will be normalized before being passed to `format()` so they will be<br/>identical to how they appear in `id`.<br/>Default is `{}` (`descriptors` output will be empty). | `any` | `{}` | no |
@@ -438,8 +499,6 @@ components:
 | <a name="input_labels_as_tags"></a> [labels\_as\_tags](#input\_labels\_as\_tags) | Set of labels (ID elements) to include as tags in the `tags` output.<br/>Default is to include all labels.<br/>Tags with empty values will not be included in the `tags` output.<br/>Set to `[]` to suppress all generated tags.<br/>**Notes:**<br/>  The value of the `name` tag, if included, will be the `id`, not the `name`.<br/>  Unlike other `null-label` inputs, the initial setting of `labels_as_tags` cannot be<br/>  changed in later chained modules. Attempts to change it will be silently ignored. | `set(string)` | <pre>[<br/>  "default"<br/>]</pre> | no |
 | <a name="input_name"></a> [name](#input\_name) | ID element. Usually the component or solution name, e.g. 'app' or 'jenkins'.<br/>This is the only ID element not also included as a `tag`.<br/>The "name" tag is set to the full `id` string. There is no tag with the value of the `name` input. | `string` | `null` | no |
 | <a name="input_namespace"></a> [namespace](#input\_namespace) | ID element. Usually an abbreviation of your organization name, e.g. 'eg' or 'cp', to help ensure generated IDs are globally unique | `string` | `null` | no |
-| <a name="input_overridable_team_permission_set_name_pattern"></a> [overridable\_team\_permission\_set\_name\_pattern](#input\_overridable\_team\_permission\_set\_name\_pattern) | The pattern used to generate the AWS SSO PermissionSet name for each team | `string` | `"Identity%sTeamAccess"` | no |
-| <a name="input_privileged"></a> [privileged](#input\_privileged) | True if the user running the Terraform command already has access to the Terraform backend | `bool` | `false` | no |
 | <a name="input_regex_replace_chars"></a> [regex\_replace\_chars](#input\_regex\_replace\_chars) | Terraform regular expression (regex) string.<br/>Characters matching the regex will be removed from the ID elements.<br/>If not set, `"/[^a-zA-Z0-9-]/"` is used to remove all characters other than hyphens, letters and digits. | `string` | `null` | no |
 | <a name="input_region"></a> [region](#input\_region) | AWS Region | `string` | n/a | yes |
 | <a name="input_session_duration"></a> [session\_duration](#input\_session\_duration) | The default duration of the session in seconds for all permission sets. If not set, fallback to the default value in the module, which is 1 hour. | `string` | `""` | no |
@@ -449,8 +508,6 @@ components:
 | <a name="input_tf_access_bucket_arn"></a> [tf\_access\_bucket\_arn](#input\_tf\_access\_bucket\_arn) | The ARN of the S3 bucket for the Terraform state backend. | `string` | `""` | no |
 | <a name="input_tf_access_dynamodb_table_arn"></a> [tf\_access\_dynamodb\_table\_arn](#input\_tf\_access\_dynamodb\_table\_arn) | The ARN of the DynamoDB table for the Terraform state backend. | `string` | `""` | no |
 | <a name="input_tf_access_role_arn"></a> [tf\_access\_role\_arn](#input\_tf\_access\_role\_arn) | The ARN of the IAM role for accessing the Terraform state backend. | `string` | `""` | no |
-| <a name="input_tfstate_backend_component_name"></a> [tfstate\_backend\_component\_name](#input\_tfstate\_backend\_component\_name) | The name of the tfstate-backend component | `string` | `"tfstate-backend"` | no |
-| <a name="input_tfstate_environment_name"></a> [tfstate\_environment\_name](#input\_tfstate\_environment\_name) | The name of the environment where `tfstate-backend` is provisioned. If not set, the TerraformUpdateAccess permission set will not be created. | `string` | `null` | no |
 
 ## Outputs
 
