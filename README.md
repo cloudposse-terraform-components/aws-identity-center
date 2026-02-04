@@ -158,7 +158,7 @@ The `aws_teams_accessible` variable (when using the mixin) provides a list of ro
 `iam-primary-roles` component. For each named role, a corresponding permission set will be created which allows the user
 to assume that role. The permission set name is generated in Terraform from the role name using a statement like this one:
 
-```
+```hcl
 format("Identity%sTeamAccess", replace(title(replace(team, "_", "-")), "-", ""))
 ```
 
