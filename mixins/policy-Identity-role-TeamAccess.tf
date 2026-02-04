@@ -1,4 +1,3 @@
-
 # This file generates a permission set for each role specified in var.target_identity_roles
 # which is named "Identity<Role>TeamAccess" and grants access to only that role,
 # plus ViewOnly access because it is difficult to navigate without any access at all.

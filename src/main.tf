@@ -3,8 +3,7 @@ locals {
 
   # module.account_map.outputs provides values from either remote state (when enabled)
   # or from the static var.account_map defaults (when bypassed)
-  account_map  = module.account_map.outputs.full_account_map
-  root_account = local.account_map[module.account_map.outputs.root_account_account_name]
+  account_map = module.account_map.outputs.full_account_map
 
   account_assignments_groups = flatten([
     for account_key, account in var.account_assignments : [
@@ -20,17 +19,6 @@ locals {
       ]
     ] if lookup(account, "groups", null) != null
   ])
-  # Remove root because the identity org role cannot provision root assignments
-  account_assignments_groups_no_root = [
-    for val in local.account_assignments_groups :
-    val
-    if val.account != local.root_account
-  ]
-  account_assignments_groups_only_root = [
-    for val in local.account_assignments_groups :
-    val
-    if val.account == local.root_account
-  ]
   account_assignments_users = flatten([
     for account_key, account in var.account_assignments : [
       for principal_key, principal in account.users : [
@@ -45,19 +33,8 @@ locals {
       ]
     ] if lookup(account, "users", null) != null
   ])
-  account_assignments_users_no_root = [
-    for val in local.account_assignments_users :
-    val
-    if val.account != local.root_account
-  ]
-  account_assignments_users_only_root = [
-    for val in local.account_assignments_users :
-    val
-    if val.account == local.root_account
-  ]
 
-  account_assignments      = concat(local.account_assignments_groups_no_root, local.account_assignments_users_no_root)
-  account_assignments_root = concat(local.account_assignments_groups_only_root, local.account_assignments_users_only_root)
+  account_assignments = concat(local.account_assignments_groups, local.account_assignments_users)
 
   aws_partition = data.aws_partition.current.partition
 }
@@ -99,13 +76,11 @@ module "permission_sets" {
     local.billing_administrator_access_permission_set,
     local.billing_read_only_access_permission_set,
     local.dns_administrator_access_permission_set,
-    local.identity_access_permission_sets,
     local.poweruser_access_permission_set,
     local.read_only_access_permission_set,
     local.root_access_permission_set,
     local.terraform_plan_access_permission_set,
     local.terraform_apply_access_permission_set,
-    local.terraform_update_access_permission_set,
     local.terraform_state_access_permission_set,
     local.terraform_plan_access_additional_permission_sets,
     local.terraform_apply_access_additional_permission_sets,
@@ -131,18 +106,3 @@ module "sso_account_assignments" {
   ]
 }
 
-module "sso_account_assignments_root" {
-  source  = "cloudposse/sso/aws//modules/account-assignments"
-  version = "1.2.0"
-
-  providers = {
-    aws = aws.root
-  }
-
-  account_assignments = local.account_assignments_root
-  context             = module.this.context
-
-  depends_on = [
-    aws_identitystore_group.manual
-  ]
-}
