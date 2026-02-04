@@ -507,7 +507,7 @@ components:
 | Name | Source | Version |
 |------|--------|---------|
 | <a name="module_account_map"></a> [account\_map](#module\_account\_map) | cloudposse/stack-config/yaml//modules/remote-state | 1.8.0 |
-| <a name="module_iam_roles"></a> [iam\_roles](#module\_iam\_roles) | cloudposse/label/null | n/a |
+| <a name="module_iam_roles"></a> [iam\_roles](#module\_iam\_roles) | cloudposse/label/null | 0.25.0 |
 | <a name="module_permission_sets"></a> [permission\_sets](#module\_permission\_sets) | cloudposse/sso/aws//modules/permission-sets | 1.2.0 |
 | <a name="module_sso_account_assignments"></a> [sso\_account\_assignments](#module\_sso\_account\_assignments) | cloudposse/sso/aws//modules/account-assignments | 1.2.0 |
 | <a name="module_this"></a> [this](#module\_this) | cloudposse/label/null | 0.25.0 |
