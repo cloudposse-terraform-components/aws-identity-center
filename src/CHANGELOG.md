@@ -2,6 +2,41 @@
 
 **_NOTE_**: This file is manually generated and is a work-in-progress.
 
+## v2.0.0 (BREAKING)
+
+This is a major release that simplifies the component architecture by removing the separate root account provider configuration.
+
+### Breaking Changes
+
+- **Removed `aws.root` provider**: The component no longer configures a separate AWS provider for the root account. This reflects the updated recommendation to deploy AWS SSO directly to the root account rather than delegating to an identity account.
+- **Removed `sso_account_assignments_root` module**: Root account assignments are no longer handled separately.
+- **Removed policy files from `src/`**: The following policy files have been moved to `mixins/` for optional use:
+  - `policy-TerraformUpdateAccess.tf`
+  - `policy-Identity-role-TeamAccess.tf`
+- **Removed variables**:
+  - `privileged`
+  - `aws_teams_accessible`
+  - `overridable_team_permission_set_name_pattern`
+  - `tfstate_backend_component_name`
+
+### Migration
+
+See [MIGRATION.md](./MIGRATION.md) for detailed migration instructions.
+
+### New Features
+
+- **Static account map support**: Set `account_map_enabled = false` to use static account mappings via the `account_map` variable, eliminating the dependency on the `account-map` component remote state lookup
+
+### What's Changed
+
+- Simplified `providers.tf` to use a basic AWS provider configuration
+- Added dummy `module.iam_roles` to satisfy module dependencies during transition
+- Moved optional policy files to `mixins/` directory for vendor-based inclusion
+- Updated `account_map_enabled` to default to `true` with improved description
+- Extended `account_map` variable with additional optional fields (`identity_account_account_name`, `aws_partition`, `iam_role_arn_templates`)
+
+---
+
 ### PR 830
 
 - Fix `providers.tf` to properly assign roles for `root` account when deploying to `identity` account.

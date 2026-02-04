@@ -11,6 +11,58 @@ Mixins are additional Terraform files that extend the base component functionali
 
 ## Available Mixins
 
+### `provider-root.tf`
+
+Provides an `aws.root` provider alias for migration scenarios. Use this mixin when upgrading from v1.x to v2.x if you have existing resources that were created with the root provider.
+
+**Variables:**
+- `root_profile_name` - The AWS profile name for the root account (default: `"core-root/terraform"`)
+
+**When to use:**
+- Migrating from v1.x where `sso_account_assignments_root` was used
+- Terraform shows "Provider configuration not present" errors for orphaned resources
+
+After migration is complete, remove this mixin.
+
+### `policy-TerraformUpdateAccess.tf`
+
+Provides a permission set for Terraform state access, allowing users to make changes to Terraform state in S3 and DynamoDB.
+
+**Variables:**
+- `tfstate_environment_name` - The environment where `tfstate-backend` is provisioned (default: `null`, which disables the permission set)
+- `tfstate_backend_component_name` - The name of the tfstate-backend component
+- `privileged` - Whether the user has privileged access
+
+**Permission Set:**
+- `TerraformUpdateAccess` - S3 and DynamoDB access for Terraform state operations
+
+**Stack Configuration Example:**
+
+When using this mixin, configure the terraform state variables in your stack:
+
+```yaml
+components:
+  terraform:
+    aws-sso:
+      vars:
+        tfstate_environment_name: "usw1"
+        tf_access_bucket_arn: !terraform.state tfstate-backend core-usw1-root tfstate_backend_s3_bucket_arn
+        tf_access_role_arn: !terraform.state tfstate-backend core-usw1-root tfstate_backend_access_role_arns["acme-core-gbl-root-tfstate"]
+```
+
+### `policy-Identity-role-TeamAccess.tf`
+
+Generates permission sets for each team role, allowing users to assume team roles in the Identity account.
+
+**Variables:**
+- `aws_teams_accessible` - List of team names (e.g., `["admin", "terraform"]`)
+- `privileged` - Whether the user has privileged access
+- `overridable_team_permission_set_name_pattern` - Pattern for permission set names (default: `"Identity%sTeamAccess"`)
+
+**Permission Sets:**
+- Creates one permission set per team (e.g., `IdentityAdminTeamAccess`, `IdentityTerraformTeamAccess`)
+- Each includes `ViewOnlyAccess` policy and role assumption permissions
+
 ### `policy-PartnerCentral.tf`
 
 Provides 8 AWS Partner Central permission sets for AWS Partner Network (APN) integration:
