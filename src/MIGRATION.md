@@ -182,7 +182,7 @@ locals {
 }
 ```
 
-**Important:** These v1 mixins also require a `providers.tf` that uses the real `account-map/modules/iam-roles` module (not the default dummy module shipped in `src/`). The `policy-TerraformUpdateAccess.tf` mixin references `module.iam_roles.global_stage_name`, which is only available from the real module. See the [mixins README](../mixins/README.md) for details on customizing `providers.tf`.
+**Important:** These v1 mixins also require a `providers.tf` that defines `module.iam_roles` using the real `account-map/modules/iam-roles` module. The `policy-TerraformUpdateAccess.tf` mixin references `module.iam_roles.global_stage_name`, which is only available from that module. See the [mixins README](../mixins/README.md) for details on customizing `providers.tf`.
 
 When using the `TerraformUpdateAccess` mixin, configure the terraform state variables in your stack:
 

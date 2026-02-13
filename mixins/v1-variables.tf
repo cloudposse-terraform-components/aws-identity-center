@@ -5,18 +5,6 @@
 # These variables were removed from the main component in v2.0.0.
 # Vendor this file alongside the policy mixins that need them.
 
-variable "privileged" {
-  type        = bool
-  description = "True if the user running the Terraform command already has access to the Terraform backend"
-  default     = false
-}
-
-variable "tfstate_backend_component_name" {
-  type        = string
-  description = "The name of the tfstate-backend component"
-  default     = "tfstate-backend"
-}
-
 variable "aws_teams_accessible" {
   type        = set(string)
   description = <<-EOT
@@ -31,6 +19,18 @@ variable "overridable_team_permission_set_name_pattern" {
   type        = string
   description = "The pattern used to generate the AWS SSO PermissionSet name for each team"
   default     = "Identity%sTeamAccess"
+}
+
+variable "privileged" {
+  type        = bool
+  description = "True if the user running the Terraform command already has access to the Terraform backend"
+  default     = false
+}
+
+variable "tfstate_backend_component_name" {
+  type        = string
+  description = "The name of the tfstate-backend component"
+  default     = "tfstate-backend"
 }
 
 variable "tfstate_environment_name" {

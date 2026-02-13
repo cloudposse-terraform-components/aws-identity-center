@@ -1,5 +1,6 @@
 locals {
-  enabled = module.this.enabled
+  # Used by optional mixin files (e.g. policy-Identity-role-TeamAccess.tf)
+  enabled = module.this.enabled # tflint-ignore: terraform_unused_declarations
 
   # module.account_map.outputs provides values from either remote state (when enabled)
   # or from the static var.account_map defaults (when bypassed)
@@ -105,4 +106,3 @@ module "sso_account_assignments" {
     aws_identitystore_group.manual
   ]
 }
-

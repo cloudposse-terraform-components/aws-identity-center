@@ -2,7 +2,7 @@
 #
 # When account_map_enabled is true:
 #   - Performs remote state lookup to retrieve account mappings from the account-map component
-#   - Uses global tenant/environment/stage from iam_roles module for the lookup
+#   - Uses the component's own context (tenant/environment/stage) for the lookup
 #
 # When account_map_enabled is false:
 #   - Bypasses the remote state lookup (bypass = true)
@@ -12,10 +12,7 @@ module "account_map" {
   source  = "cloudposse/stack-config/yaml//modules/remote-state"
   version = "1.8.0"
 
-  component   = var.account_map_component_name
-  tenant      = var.account_map_enabled ? module.iam_roles.global_tenant_name : null
-  environment = var.account_map_enabled ? module.iam_roles.global_environment_name : null
-  stage       = var.account_map_enabled ? module.iam_roles.global_stage_name : null
+  component = var.account_map_component_name
 
   context = module.this.context
 

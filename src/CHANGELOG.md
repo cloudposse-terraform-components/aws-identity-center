@@ -2,6 +2,19 @@
 
 **_NOTE_**: This file is manually generated and is a work-in-progress.
 
+## v2.0.2
+
+### Bug Fixes
+
+- Added `v1-variables.tf` mixin with shared variable definitions required by `policy-TerraformUpdateAccess.tf` and `policy-Identity-role-TeamAccess.tf`
+- Moved `var.tfstate_environment_name` from `policy-TerraformUpdateAccess.tf` into `v1-variables.tf`
+- Removed dummy `module.iam_roles` from `providers.tf`
+- Refactored `remote-state.tf` to use component context instead of `module.iam_roles` outputs
+- Updated `MIGRATION.md` to document the three-file mixin requirement for v1 policy support
+- Updated mixins `README.md` with dependency documentation
+
+---
+
 ## v2.0.0 (BREAKING)
 
 This is a major release that simplifies the component architecture by removing the separate root account provider configuration.
