@@ -1,5 +1,5 @@
 locals {
-  poweruser_access_permission_set = [{
+  poweruser_access_permission_set = local.enabled ? [{
     name             = "PowerUserAccess",
     description      = "Allow Poweruser access to the account",
     relay_state      = "",
@@ -11,5 +11,5 @@ locals {
       "arn:${local.aws_partition}:iam::aws:policy/AWSSupportAccess",
     ]
     customer_managed_policy_attachments = []
-  }]
+  }] : []
 }
