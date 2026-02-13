@@ -1,9 +1,3 @@
-variable "tfstate_environment_name" {
-  type        = string
-  description = "The name of the environment where `tfstate-backend` is provisioned. If not set, the TerraformUpdateAccess permission set will not be created."
-  default     = null
-}
-
 locals {
   tf_update_access_enabled = var.tfstate_environment_name != null && module.this.enabled
 }

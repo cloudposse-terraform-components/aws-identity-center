@@ -32,3 +32,9 @@ variable "overridable_team_permission_set_name_pattern" {
   description = "The pattern used to generate the AWS SSO PermissionSet name for each team"
   default     = "Identity%sTeamAccess"
 }
+
+variable "tfstate_environment_name" {
+  type        = string
+  description = "The name of the environment where `tfstate-backend` is provisioned. If not set, the TerraformUpdateAccess permission set will not be created."
+  default     = null
+}
