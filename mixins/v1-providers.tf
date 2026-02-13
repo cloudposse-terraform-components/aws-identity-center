@@ -1,15 +1,18 @@
-# Default providers.tf for use without the account-map component.
-# If your infrastructure uses account-map for dynamic account resolution,
-# vendor the v1-providers.tf mixin instead, which replaces this file.
+# This mixin replaces the default providers.tf to enable account-map integration.
+# It provides:
+#   - Real iam-roles module for dynamic role resolution
+#   - Provider with profile/role assumption support
+#   - account_map_enabled defaults to true
+#
+# Vendor this file when your infrastructure uses the account-map component.
 
 variable "account_map_enabled" {
   type        = bool
   description = <<-EOT
     When true, uses the account-map component to look up account IDs dynamically.
-    When false, uses the static account_map variable instead. Set to false when
-    using Atmos Auth profiles and static account mappings.
+    When false, uses the static account_map variable instead.
     EOT
-  default     = false
+  default     = true
 }
 
 variable "account_map" {
@@ -32,17 +35,30 @@ variable "account_map" {
   }
 }
 
-provider "aws" {
-  region = var.region
+variable "privileged" {
+  type        = bool
+  description = "True if the user running the Terraform command already has access to the Terraform backend"
+  default     = false
 }
 
-# Dummy module to satisfy references from optional mixin files that use
-# module.iam_roles (e.g. policy-TerraformUpdateAccess.tf).
-# When using account-map, vendor the v1-providers.tf mixin which replaces
-# this with the real iam-roles module.
+provider "aws" {
+  region = var.region
+
+  profile = !var.privileged && module.iam_roles.profiles_enabled ? module.iam_roles.terraform_profile_name : null
+
+  dynamic "assume_role" {
+    for_each = !var.privileged && module.iam_roles.profiles_enabled ? [] : (
+      var.privileged ? compact([module.iam_roles.org_role_arn]) : compact([module.iam_roles.terraform_role_arn])
+    )
+    content {
+      role_arn = assume_role.value
+    }
+  }
+}
+
 module "iam_roles" {
-  source  = "cloudposse/label/null"
-  version = "0.25.0"
+  source     = "../account-map/modules/iam-roles"
+  privileged = var.privileged
 
   context = module.this.context
 }

@@ -18,8 +18,8 @@ The `aws.root` provider alias has been removed from `providers.tf`. Previously, 
 
 This version adds support for bypassing the `account-map` remote state lookup by using static account mappings. This is controlled by the `account_map_enabled` variable:
 
-- **`account_map_enabled = true`** (default): Uses the `account-map` component to look up account IDs dynamically via remote state
-- **`account_map_enabled = false`**: Uses the static `account_map` variable instead, eliminating the dependency on the `account-map` component
+- **`account_map_enabled = false`** (default): Uses the static `account_map` variable instead, eliminating the dependency on the `account-map` component
+- **`account_map_enabled = true`**: Uses the `account-map` component to look up account IDs dynamically via remote state. To enable this, vendor the `v1-providers.tf` mixin which sets the default to `true` and provides the real `iam-roles` module.
 
 When using static account mappings, configure the `account_map` variable directly:
 
@@ -56,6 +56,7 @@ The following policy files have been moved from `src/` to `mixins/` for optional
 
 - `policy-TerraformUpdateAccess.tf` - Permission set for Terraform state access
 - `policy-Identity-role-TeamAccess.tf` - Permission sets for team role assumption
+- `v1-variables.tf` - Shared variable definitions required by both policy mixins above
 
 ### Removed Variables
 
@@ -132,10 +133,10 @@ atmos vendor pull -c aws-sso
 
 ### Step 5: Update Stack Configuration
 
-Remove any references to the removed variables from your stack configuration:
+If you are **not** using the v1 policy mixins (Step 6), remove references to the removed variables from your stack configuration:
 
 ```yaml
-# Remove these from your vars:
+# Remove these from your vars if not using v1 mixins:
 components:
   terraform:
     aws-sso:
@@ -146,19 +147,37 @@ components:
         # tfstate_backend_component_name: "..."  # REMOVE
 ```
 
-### Step 6: Vendor Optional Policy Mixins (if needed)
+If you **are** keeping the v1 mixins, leave these variables in place — they are defined by `v1-variables.tf` and still consumed by the policy mixins.
 
-If you were using the `TerraformUpdateAccess` or `Identity-role-TeamAccess` permission sets and want to continue using them, vendor them as mixins:
+### Step 6: Vendor v1 Policy Mixins (if needed)
+
+If you were using the `TerraformUpdateAccess` or `Identity-role-TeamAccess` permission sets and want to continue using them, you must vendor the following files:
+
+1. **`v1-providers.tf`** (required) - Replaces the default providers.tf with account-map support and the real `iam-roles` module
+2. **`v1-variables.tf`** (required) - Shared variable definitions removed in v2.0.0
+3. The policy file(s) you need
 
 ```yaml
 mixins:
+  - uri: https://raw.githubusercontent.com/cloudposse-terraform-components/aws-identity-center/{{ .Version }}/mixins/v1-providers.tf
+    version: v2.0.2
+    filename: providers.tf
+  - uri: https://raw.githubusercontent.com/cloudposse-terraform-components/aws-identity-center/{{ .Version }}/mixins/v1-variables.tf
+    version: v2.0.2
+    filename: v1-variables.tf
   - uri: https://raw.githubusercontent.com/cloudposse-terraform-components/aws-identity-center/{{ .Version }}/mixins/policy-TerraformUpdateAccess.tf
-    version: v2.0.0
+    version: v2.0.2
     filename: policy-TerraformUpdateAccess.tf
   - uri: https://raw.githubusercontent.com/cloudposse-terraform-components/aws-identity-center/{{ .Version }}/mixins/policy-Identity-role-TeamAccess.tf
-    version: v2.0.0
+    version: v2.0.2
     filename: policy-Identity-role-TeamAccess.tf
 ```
+
+**`v1-providers.tf` is required.** The v1 policy mixins reference `module.iam_roles.global_stage_name` and `../account-map/modules/roles-to-principals`, which require the real `iam-roles` module. The default `providers.tf` uses a dummy module that does not provide these outputs. The `v1-providers.tf` mixin also defines `var.privileged`, which is needed by both the provider and the policy files.
+
+**`v1-variables.tf` is required.** It defines `var.tfstate_backend_component_name`, `var.aws_teams_accessible`, and `var.overridable_team_permission_set_name_pattern` — variables that were removed from the main component in v2.0.0 but are still needed by the policy mixins.
+
+You may vendor either or both policy files depending on which permission sets you need, but `v1-providers.tf` and `v1-variables.tf` must always be included alongside them.
 
 Then add the permission sets to your `additional-permission-sets_override.tf`:
 
@@ -172,7 +191,7 @@ locals {
 }
 ```
 
-**Important:** When using the `TerraformUpdateAccess` mixin, you must configure the terraform state variables in your stack configuration:
+When using the `TerraformUpdateAccess` mixin, configure the terraform state variables in your stack:
 
 ```yaml
 components:
