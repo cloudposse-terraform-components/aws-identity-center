@@ -1,5 +1,5 @@
 locals {
-  tf_update_access_enabled = var.tfstate_environment_name != null && module.this.enabled
+  tf_update_access_enabled = var.tfstate_environment_name != null && local.enabled
 }
 
 module "tfstate" {
@@ -23,14 +23,14 @@ data "aws_iam_policy_document" "terraform_update_access" {
     sid     = "TerraformStateBackendS3Bucket"
     effect  = "Allow"
     actions = ["s3:ListBucket", "s3:GetObject", "s3:PutObject"]
-    resources = module.this.enabled ? [
+    resources = local.enabled ? [
       module.tfstate.outputs.tfstate_backend_s3_bucket_arn,
       "${module.tfstate.outputs.tfstate_backend_s3_bucket_arn}/*"
     ] : []
   }
 
   dynamic "statement" {
-    for_each = (module.this.enabled && module.tfstate.outputs.tfstate_backend_dynamodb_table_arn != "") ? [1] : []
+    for_each = (local.enabled && module.tfstate.outputs.tfstate_backend_dynamodb_table_arn != "") ? [1] : []
 
     content {
       sid       = "TerraformStateBackendDynamoDbTable"
