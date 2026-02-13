@@ -6,11 +6,14 @@
 
 ### Bug Fixes
 
-- Added `v1-variables.tf` mixin with shared variable definitions required by `policy-TerraformUpdateAccess.tf` and `policy-Identity-role-TeamAccess.tf`
+- Added `providers.tf` mixin with real `iam-roles` module and role-assuming provider for account-map users
+- Added `v1-variables.tf` mixin with shared variable definitions required by v1 policy mixins
 - Moved `var.tfstate_environment_name` from `policy-TerraformUpdateAccess.tf` into `v1-variables.tf`
-- Removed dummy `module.iam_roles` from `providers.tf`
+- Moved `var.privileged` into the `providers.tf` mixin (needed by `iam-roles` module)
+- Restored dummy `module.iam_roles` in default `providers.tf` (satisfies mixin references)
+- Changed `account_map_enabled` default to `false` (account-map users vendor the providers mixin)
 - Refactored `remote-state.tf` to use component context instead of `module.iam_roles` outputs
-- Updated `MIGRATION.md` to document the three-file mixin requirement for v1 policy support
+- Updated `MIGRATION.md` to document the providers mixin requirement for v1 policy support
 - Updated mixins `README.md` with dependency documentation
 
 ---
@@ -45,7 +48,7 @@ See [MIGRATION.md](./MIGRATION.md) for detailed migration instructions.
 - Simplified `providers.tf` to use a basic AWS provider configuration
 - Added dummy `module.iam_roles` to satisfy module dependencies during transition
 - Moved optional policy files to `mixins/` directory for vendor-based inclusion
-- Updated `account_map_enabled` to default to `true` with improved description
+- Added `account_map_enabled` variable (default: `false`) with improved description
 - Extended `account_map` variable with additional optional fields (`identity_account_account_name`, `aws_partition`, `iam_role_arn_templates`)
 
 ---

@@ -4,6 +4,9 @@
 #
 # These variables were removed from the main component in v2.0.0.
 # Vendor this file alongside the policy mixins that need them.
+#
+# Note: var.privileged is defined in the providers.tf mixin, which is
+# required when using v1 policy mixins (they reference module.iam_roles).
 
 variable "aws_teams_accessible" {
   type        = set(string)
@@ -19,12 +22,6 @@ variable "overridable_team_permission_set_name_pattern" {
   type        = string
   description = "The pattern used to generate the AWS SSO PermissionSet name for each team"
   default     = "Identity%sTeamAccess"
-}
-
-variable "privileged" {
-  type        = bool
-  description = "True if the user running the Terraform command already has access to the Terraform backend"
-  default     = false
 }
 
 variable "tfstate_backend_component_name" {
