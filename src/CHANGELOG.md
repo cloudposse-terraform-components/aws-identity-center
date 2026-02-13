@@ -6,10 +6,10 @@
 
 ### Bug Fixes
 
-- Added `providers.tf` mixin with real `iam-roles` module and role-assuming provider for account-map users
+- Added `v1-providers.tf` mixin with real `iam-roles` module and role-assuming provider for account-map users
 - Added `v1-variables.tf` mixin with shared variable definitions required by v1 policy mixins
 - Moved `var.tfstate_environment_name` from `policy-TerraformUpdateAccess.tf` into `v1-variables.tf`
-- Moved `var.privileged` into the `providers.tf` mixin (needed by `iam-roles` module)
+- Moved `var.privileged` into the `v1-providers.tf` mixin (needed by `iam-roles` module)
 - Restored dummy `module.iam_roles` in default `providers.tf` (satisfies mixin references)
 - Changed `account_map_enabled` default to `false` (account-map users vendor the providers mixin)
 - Refactored `remote-state.tf` to use component context instead of `module.iam_roles` outputs

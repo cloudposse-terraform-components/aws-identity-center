@@ -11,7 +11,7 @@ Mixins are additional Terraform files that extend the base component functionali
 
 ## Available Mixins
 
-### `providers.tf`
+### `v1-providers.tf`
 
 Replaces the default `providers.tf` to enable account-map integration. Use this mixin when your infrastructure uses the `account-map` component for dynamic account resolution and IAM role assumption.
 
@@ -53,18 +53,18 @@ Shared variable definitions required by `policy-TerraformUpdateAccess.tf` and `p
 - `tfstate_backend_component_name` - The name of the tfstate-backend component (default: `"tfstate-backend"`)
 - `tfstate_environment_name` - The environment where tfstate-backend is provisioned (default: `null`)
 
-**Note:** `var.privileged` is defined in the `providers.tf` mixin, which is required when using v1 policy mixins.
+**Note:** `var.privileged` is defined in the `v1-providers.tf` mixin, which is required when using v1 policy mixins.
 
 ### `policy-TerraformUpdateAccess.tf`
 
 Provides a permission set for Terraform state access, allowing users to make changes to Terraform state in S3 and DynamoDB.
 
-**Requires:** `providers.tf` mixin, `v1-variables.tf`
+**Requires:** `v1-providers.tf` mixin, `v1-variables.tf`
 
 **Variables** (from `v1-variables.tf`):
 - `tfstate_environment_name`, `tfstate_backend_component_name`
 
-**Variables** (from `providers.tf` mixin):
+**Variables** (from `v1-providers.tf` mixin):
 - `privileged`
 
 **Permission Set:**
@@ -88,12 +88,12 @@ components:
 
 Generates permission sets for each team role, allowing users to assume team roles in the Identity account.
 
-**Requires:** `providers.tf` mixin, `v1-variables.tf`
+**Requires:** `v1-providers.tf` mixin, `v1-variables.tf`
 
 **Variables** (from `v1-variables.tf`):
 - `aws_teams_accessible`, `overridable_team_permission_set_name_pattern`
 
-**Variables** (from `providers.tf` mixin):
+**Variables** (from `v1-providers.tf` mixin):
 - `privileged`
 
 **Permission Sets:**
@@ -185,7 +185,7 @@ cp mixins/policy-PartnerCentral.tf components/terraform/aws-sso/
 
 The v1 policy mixins (`policy-TerraformUpdateAccess.tf` and `policy-Identity-role-TeamAccess.tf`) require three files to be vendored together:
 
-1. **`providers.tf`** - Real iam-roles module and provider with role assumption
+1. **`v1-providers.tf`** - Real iam-roles module and provider with role assumption (vendored as `providers.tf`)
 2. **`v1-variables.tf`** - Shared variable definitions
 3. The policy file(s) you need
 
@@ -193,7 +193,7 @@ Example `component.yaml` for v1 policy mixins:
 
 ```yaml
 mixins:
-  - uri: github.com/cloudposse-terraform-components/aws-identity-center.git//mixins/providers.tf?ref={{ .Version }}
+  - uri: github.com/cloudposse-terraform-components/aws-identity-center.git//mixins/v1-providers.tf?ref={{ .Version }}
     version: 2.0.2
     filename: providers.tf
   - uri: github.com/cloudposse-terraform-components/aws-identity-center.git//mixins/v1-variables.tf?ref={{ .Version }}
@@ -207,7 +207,7 @@ mixins:
     filename: policy-Identity-role-TeamAccess.tf
 ```
 
-**Important:** The `providers.tf` mixin replaces the default `providers.tf` from `src/`. This is intentional — it enables account-map integration which the v1 policy files require.
+**Important:** The `v1-providers.tf` mixin replaces the default `providers.tf` from `src/`. This is intentional — it enables account-map integration which the v1 policy files require.
 
 ## Activating Vendored Permission Sets
 

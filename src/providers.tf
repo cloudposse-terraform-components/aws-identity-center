@@ -1,6 +1,6 @@
 # Default providers.tf for use without the account-map component.
 # If your infrastructure uses account-map for dynamic account resolution,
-# vendor the providers.tf mixin instead, which replaces this file.
+# vendor the v1-providers.tf mixin instead, which replaces this file.
 
 variable "account_map_enabled" {
   type        = bool
@@ -38,7 +38,7 @@ provider "aws" {
 
 # Dummy module to satisfy references from optional mixin files that use
 # module.iam_roles (e.g. policy-TerraformUpdateAccess.tf).
-# When using account-map, vendor the providers.tf mixin which replaces
+# When using account-map, vendor the v1-providers.tf mixin which replaces
 # this with the real iam-roles module.
 module "iam_roles" {
   source  = "cloudposse/label/null"

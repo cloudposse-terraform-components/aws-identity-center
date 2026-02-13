@@ -19,7 +19,7 @@ The `aws.root` provider alias has been removed from `providers.tf`. Previously, 
 This version adds support for bypassing the `account-map` remote state lookup by using static account mappings. This is controlled by the `account_map_enabled` variable:
 
 - **`account_map_enabled = false`** (default): Uses the static `account_map` variable instead, eliminating the dependency on the `account-map` component
-- **`account_map_enabled = true`**: Uses the `account-map` component to look up account IDs dynamically via remote state. To enable this, vendor the `providers.tf` mixin which sets the default to `true` and provides the real `iam-roles` module.
+- **`account_map_enabled = true`**: Uses the `account-map` component to look up account IDs dynamically via remote state. To enable this, vendor the `v1-providers.tf` mixin which sets the default to `true` and provides the real `iam-roles` module.
 
 When using static account mappings, configure the `account_map` variable directly:
 
@@ -153,13 +153,13 @@ If you **are** keeping the v1 mixins, leave these variables in place — they ar
 
 If you were using the `TerraformUpdateAccess` or `Identity-role-TeamAccess` permission sets and want to continue using them, you must vendor the following files:
 
-1. **`providers.tf`** (required) - Replaces the default providers.tf with account-map support and the real `iam-roles` module
+1. **`v1-providers.tf`** (required) - Replaces the default providers.tf with account-map support and the real `iam-roles` module
 2. **`v1-variables.tf`** (required) - Shared variable definitions removed in v2.0.0
 3. The policy file(s) you need
 
 ```yaml
 mixins:
-  - uri: https://raw.githubusercontent.com/cloudposse-terraform-components/aws-identity-center/{{ .Version }}/mixins/providers.tf
+  - uri: https://raw.githubusercontent.com/cloudposse-terraform-components/aws-identity-center/{{ .Version }}/mixins/v1-providers.tf
     version: v2.0.2
     filename: providers.tf
   - uri: https://raw.githubusercontent.com/cloudposse-terraform-components/aws-identity-center/{{ .Version }}/mixins/v1-variables.tf
@@ -173,11 +173,11 @@ mixins:
     filename: policy-Identity-role-TeamAccess.tf
 ```
 
-**`providers.tf` is required.** The v1 policy mixins reference `module.iam_roles.global_stage_name` and `../account-map/modules/roles-to-principals`, which require the real `iam-roles` module. The default `providers.tf` uses a dummy module that does not provide these outputs. The `providers.tf` mixin also defines `var.privileged`, which is needed by both the provider and the policy files.
+**`v1-providers.tf` is required.** The v1 policy mixins reference `module.iam_roles.global_stage_name` and `../account-map/modules/roles-to-principals`, which require the real `iam-roles` module. The default `providers.tf` uses a dummy module that does not provide these outputs. The `v1-providers.tf` mixin also defines `var.privileged`, which is needed by both the provider and the policy files.
 
 **`v1-variables.tf` is required.** It defines `var.tfstate_backend_component_name`, `var.aws_teams_accessible`, and `var.overridable_team_permission_set_name_pattern` — variables that were removed from the main component in v2.0.0 but are still needed by the policy mixins.
 
-You may vendor either or both policy files depending on which permission sets you need, but `providers.tf` and `v1-variables.tf` must always be included alongside them.
+You may vendor either or both policy files depending on which permission sets you need, but `v1-providers.tf` and `v1-variables.tf` must always be included alongside them.
 
 Then add the permission sets to your `additional-permission-sets_override.tf`:
 

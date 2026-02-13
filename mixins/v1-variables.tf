@@ -5,7 +5,7 @@
 # These variables were removed from the main component in v2.0.0.
 # Vendor this file alongside the policy mixins that need them.
 #
-# Note: var.privileged is defined in the providers.tf mixin, which is
+# Note: var.privileged is defined in the v1-providers.tf mixin, which is
 # required when using v1 policy mixins (they reference module.iam_roles).
 
 variable "aws_teams_accessible" {
