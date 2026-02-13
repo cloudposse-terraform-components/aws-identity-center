@@ -26,7 +26,7 @@ After migration is complete, remove this mixin.
 
 ### `v1-variables.tf`
 
-Shared variable definitions required by `policy-TerraformUpdateAccess.tf` and `policy-Identity-role-TeamAccess.tf`. These variables were removed from the main component in v2.0.0. **You must vendor this file alongside either of the legacy policy mixins.**
+Shared variable definitions required by `policy-TerraformUpdateAccess.tf` and `policy-Identity-role-TeamAccess.tf`. These variables were removed from the main component in v2.0.0. **You must vendor this file alongside either of the v1 policy mixins.**
 
 **Variables:**
 - `privileged` - Whether the user has privileged access (default: `false`)

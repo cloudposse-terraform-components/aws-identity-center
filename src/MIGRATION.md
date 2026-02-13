@@ -133,10 +133,10 @@ atmos vendor pull -c aws-sso
 
 ### Step 5: Update Stack Configuration
 
-If you are **not** using the legacy policy mixins (Step 6), remove references to the removed variables from your stack configuration:
+If you are **not** using the v1 policy mixins (Step 6), remove references to the removed variables from your stack configuration:
 
 ```yaml
-# Remove these from your vars if not using legacy mixins:
+# Remove these from your vars if not using v1 mixins:
 components:
   terraform:
     aws-sso:
@@ -147,9 +147,9 @@ components:
         # tfstate_backend_component_name: "..."  # REMOVE
 ```
 
-If you **are** keeping the legacy mixins, leave these variables in place — they are defined by `v1-variables.tf` and still consumed by the policy mixins.
+If you **are** keeping the v1 mixins, leave these variables in place — they are defined by `v1-variables.tf` and still consumed by the policy mixins.
 
-### Step 6: Vendor Legacy Policy Mixins (if needed)
+### Step 6: Vendor v1 Policy Mixins (if needed)
 
 If you were using the `TerraformUpdateAccess` or `Identity-role-TeamAccess` permission sets and want to continue using them, you must vendor **three** files: the policy files and their shared variable definitions.
 
@@ -182,7 +182,7 @@ locals {
 }
 ```
 
-**Important:** These legacy mixins also require a `providers.tf` that uses the real `account-map/modules/iam-roles` module (not the default dummy module shipped in `src/`). The `policy-TerraformUpdateAccess.tf` mixin references `module.iam_roles.global_stage_name`, which is only available from the real module. See the [mixins README](../mixins/README.md) for details on customizing `providers.tf`.
+**Important:** These v1 mixins also require a `providers.tf` that uses the real `account-map/modules/iam-roles` module (not the default dummy module shipped in `src/`). The `policy-TerraformUpdateAccess.tf` mixin references `module.iam_roles.global_stage_name`, which is only available from the real module. See the [mixins README](../mixins/README.md) for details on customizing `providers.tf`.
 
 When using the `TerraformUpdateAccess` mixin, configure the terraform state variables in your stack:
 
