@@ -24,14 +24,29 @@ Provides an `aws.root` provider alias for migration scenarios. Use this mixin wh
 
 After migration is complete, remove this mixin.
 
+### `v1-variables.tf`
+
+Shared variable definitions required by `policy-TerraformUpdateAccess.tf` and `policy-Identity-role-TeamAccess.tf`. These variables were removed from the main component in v2.0.0. **You must vendor this file alongside either of the legacy policy mixins.**
+
+**Variables:**
+- `privileged` - Whether the user has privileged access (default: `false`)
+- `tfstate_backend_component_name` - The name of the tfstate-backend component (default: `"tfstate-backend"`)
+- `aws_teams_accessible` - List of team names for Identity role access (default: `[]`)
+- `overridable_team_permission_set_name_pattern` - Pattern for team permission set names (default: `"Identity%sTeamAccess"`)
+
 ### `policy-TerraformUpdateAccess.tf`
 
 Provides a permission set for Terraform state access, allowing users to make changes to Terraform state in S3 and DynamoDB.
 
-**Variables:**
+**Requires:** `v1-variables.tf`
+
+**Variables** (defined in this file):
 - `tfstate_environment_name` - The environment where `tfstate-backend` is provisioned (default: `null`, which disables the permission set)
-- `tfstate_backend_component_name` - The name of the tfstate-backend component
-- `privileged` - Whether the user has privileged access
+
+**Variables** (from `v1-variables.tf`):
+- `tfstate_backend_component_name`, `privileged`
+
+**Additional requirement:** This mixin references `module.iam_roles.global_stage_name`. The default `providers.tf` shipped in `src/` uses a dummy module that does not provide this output. You must customize `providers.tf` to use the real `account-map/modules/iam-roles` module.
 
 **Permission Set:**
 - `TerraformUpdateAccess` - S3 and DynamoDB access for Terraform state operations
@@ -54,10 +69,10 @@ components:
 
 Generates permission sets for each team role, allowing users to assume team roles in the Identity account.
 
-**Variables:**
-- `aws_teams_accessible` - List of team names (e.g., `["admin", "terraform"]`)
-- `privileged` - Whether the user has privileged access
-- `overridable_team_permission_set_name_pattern` - Pattern for permission set names (default: `"Identity%sTeamAccess"`)
+**Requires:** `v1-variables.tf`
+
+**Variables** (from `v1-variables.tf`):
+- `aws_teams_accessible`, `privileged`, `overridable_team_permission_set_name_pattern`
 
 **Permission Sets:**
 - Creates one permission set per team (e.g., `IdentityAdminTeamAccess`, `IdentityTerraformTeamAccess`)

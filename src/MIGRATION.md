@@ -56,6 +56,7 @@ The following policy files have been moved from `src/` to `mixins/` for optional
 
 - `policy-TerraformUpdateAccess.tf` - Permission set for Terraform state access
 - `policy-Identity-role-TeamAccess.tf` - Permission sets for team role assumption
+- `v1-variables.tf` - Shared variable definitions required by both policy mixins above
 
 ### Removed Variables
 
@@ -132,10 +133,10 @@ atmos vendor pull -c aws-sso
 
 ### Step 5: Update Stack Configuration
 
-Remove any references to the removed variables from your stack configuration:
+If you are **not** using the legacy policy mixins (Step 6), remove references to the removed variables from your stack configuration:
 
 ```yaml
-# Remove these from your vars:
+# Remove these from your vars if not using legacy mixins:
 components:
   terraform:
     aws-sso:
@@ -146,19 +147,28 @@ components:
         # tfstate_backend_component_name: "..."  # REMOVE
 ```
 
-### Step 6: Vendor Optional Policy Mixins (if needed)
+If you **are** keeping the legacy mixins, leave these variables in place — they are defined by `v1-variables.tf` and still consumed by the policy mixins.
 
-If you were using the `TerraformUpdateAccess` or `Identity-role-TeamAccess` permission sets and want to continue using them, vendor them as mixins:
+### Step 6: Vendor Legacy Policy Mixins (if needed)
+
+If you were using the `TerraformUpdateAccess` or `Identity-role-TeamAccess` permission sets and want to continue using them, you must vendor **three** files: the policy files and their shared variable definitions.
 
 ```yaml
 mixins:
+  - uri: https://raw.githubusercontent.com/cloudposse-terraform-components/aws-identity-center/{{ .Version }}/mixins/v1-variables.tf
+    version: v2.0.1
+    filename: v1-variables.tf
   - uri: https://raw.githubusercontent.com/cloudposse-terraform-components/aws-identity-center/{{ .Version }}/mixins/policy-TerraformUpdateAccess.tf
-    version: v2.0.0
+    version: v2.0.1
     filename: policy-TerraformUpdateAccess.tf
   - uri: https://raw.githubusercontent.com/cloudposse-terraform-components/aws-identity-center/{{ .Version }}/mixins/policy-Identity-role-TeamAccess.tf
-    version: v2.0.0
+    version: v2.0.1
     filename: policy-Identity-role-TeamAccess.tf
 ```
+
+**`v1-variables.tf` is required.** It defines `var.privileged`, `var.tfstate_backend_component_name`, `var.aws_teams_accessible`, and `var.overridable_team_permission_set_name_pattern` — variables that were removed from the main component in v2.0.0 but are still needed by the two policy mixins. Without it, Terraform will fail with undefined variable errors.
+
+You may vendor either or both policy files depending on which permission sets you need, but `v1-variables.tf` must always be included alongside them.
 
 Then add the permission sets to your `additional-permission-sets_override.tf`:
 
@@ -172,7 +182,9 @@ locals {
 }
 ```
 
-**Important:** When using the `TerraformUpdateAccess` mixin, you must configure the terraform state variables in your stack configuration:
+**Important:** These legacy mixins also require a `providers.tf` that uses the real `account-map/modules/iam-roles` module (not the default dummy module shipped in `src/`). The `policy-TerraformUpdateAccess.tf` mixin references `module.iam_roles.global_stage_name`, which is only available from the real module. See the [mixins README](../mixins/README.md) for details on customizing `providers.tf`.
+
+When using the `TerraformUpdateAccess` mixin, configure the terraform state variables in your stack:
 
 ```yaml
 components:
