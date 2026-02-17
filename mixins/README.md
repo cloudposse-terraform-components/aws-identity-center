@@ -133,7 +133,7 @@ spec:
 
   # Mixins are pulled and merged into your component directory
   mixins:
-    - uri: github.com/cloudposse-terraform-components/aws-identity-center.git//mixins/policy-PartnerCentral.tf?ref={{ .Version }}
+    - uri: https://raw.githubusercontent.com/cloudposse-terraform-components/aws-identity-center/{{ .Version }}/mixins/policy-PartnerCentral.tf
       version: 1.0.0
       filename: policy-PartnerCentral.tf
 ```
@@ -163,7 +163,7 @@ spec:
         - "**/**"
       excluded_paths: []
       mixins:
-        - source: "github.com/cloudposse-terraform-components/aws-identity-center.git//mixins/policy-PartnerCentral.tf?ref={{ .Version }}"
+        - source: "https://raw.githubusercontent.com/cloudposse-terraform-components/aws-identity-center/{{ .Version }}/mixins/policy-PartnerCentral.tf"
           version: "1.0.0"
           filename: "policy-PartnerCentral.tf"
 ```
@@ -193,16 +193,16 @@ Example `component.yaml` for v1 policy mixins:
 
 ```yaml
 mixins:
-  - uri: github.com/cloudposse-terraform-components/aws-identity-center.git//mixins/v1-providers.tf?ref={{ .Version }}
+  - uri: https://raw.githubusercontent.com/cloudposse-terraform-components/aws-identity-center/{{ .Version }}/mixins/v1-providers.tf
     version: 2.0.2
     filename: providers.tf
-  - uri: github.com/cloudposse-terraform-components/aws-identity-center.git//mixins/v1-variables.tf?ref={{ .Version }}
+  - uri: https://raw.githubusercontent.com/cloudposse-terraform-components/aws-identity-center/{{ .Version }}/mixins/v1-variables.tf
     version: 2.0.2
     filename: v1-variables.tf
-  - uri: github.com/cloudposse-terraform-components/aws-identity-center.git//mixins/policy-TerraformUpdateAccess.tf?ref={{ .Version }}
+  - uri: https://raw.githubusercontent.com/cloudposse-terraform-components/aws-identity-center/{{ .Version }}/mixins/policy-TerraformUpdateAccess.tf
     version: 2.0.2
     filename: policy-TerraformUpdateAccess.tf
-  - uri: github.com/cloudposse-terraform-components/aws-identity-center.git//mixins/policy-Identity-role-TeamAccess.tf?ref={{ .Version }}
+  - uri: https://raw.githubusercontent.com/cloudposse-terraform-components/aws-identity-center/{{ .Version }}/mixins/policy-Identity-role-TeamAccess.tf
     version: 2.0.2
     filename: policy-Identity-role-TeamAccess.tf
 ```

@@ -102,7 +102,7 @@ Or add to your `vendor.yaml`:
 
 ```yaml
 mixins:
-  - source: "github.com/cloudposse-terraform-components/aws-identity-center.git//mixins/provider-root.tf?ref={{ .Version }}"
+  - source: "https://raw.githubusercontent.com/cloudposse-terraform-components/aws-identity-center/{{ .Version }}/mixins/provider-root.tf"
     version: "v1.540.0"
     filename: "provider-root.tf"
 ```
