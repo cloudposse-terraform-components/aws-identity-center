@@ -1,5 +1,4 @@
 locals {
-  # Used by optional mixin files (e.g. policy-Identity-role-TeamAccess.tf)
   enabled = module.this.enabled
 
   # module.account_map.outputs provides values from either remote state (when enabled)
