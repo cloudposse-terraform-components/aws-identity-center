@@ -1,5 +1,5 @@
 locals {
-  root_access_permission_set = [{
+  root_access_permission_set = local.enabled ? [{
     name             = "RootAccess",
     description      = "Allow centralized root access to member accounts via sts:AssumeRoot",
     relay_state      = "",
@@ -27,5 +27,5 @@ locals {
     })
     policy_attachments                  = []
     customer_managed_policy_attachments = []
-  }]
+  }] : []
 }

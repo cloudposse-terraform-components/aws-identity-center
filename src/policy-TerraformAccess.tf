@@ -49,10 +49,10 @@ variable "tf_access_additional_backends" {
 }
 
 locals {
-  tf_access_enabled = module.this.enabled && var.tf_access_bucket_arn != "" && var.tf_access_role_arn != ""
+  tf_access_enabled = local.enabled && var.tf_access_bucket_arn != "" && var.tf_access_role_arn != ""
 
   # Additional backends access
-  tf_access_additional_backends_enabled = module.this.enabled && length(var.tf_access_additional_backends) > 0
+  tf_access_additional_backends_enabled = local.enabled && length(var.tf_access_additional_backends) > 0
 
   # Helper to title-case the backend names for permission set names
   # "core" -> "Core", "plat" -> "Plat", "prod-us-east-1" -> "ProdUsEast1"

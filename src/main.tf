@@ -105,4 +105,3 @@ module "sso_account_assignments" {
     aws_identitystore_group.manual
   ]
 }
-

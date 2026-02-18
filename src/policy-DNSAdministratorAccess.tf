@@ -1,4 +1,6 @@
 data "aws_iam_policy_document" "dns_administrator_access" {
+  count = local.enabled ? 1 : 0
+
   statement {
     sid    = "AllowDNS"
     effect = "Allow"
@@ -26,14 +28,14 @@ data "aws_iam_policy_document" "dns_administrator_access" {
 }
 
 locals {
-  dns_administrator_access_permission_set = [{
+  dns_administrator_access_permission_set = local.enabled ? [{
     name                                = "DNSRecordAdministratorAccess",
     description                         = "Allow DNS Record Administrator access to the account, but not zone administration",
     relay_state                         = "https://console.aws.amazon.com/route53/",
     session_duration                    = var.session_duration,
     tags                                = module.this.tags,
-    inline_policy                       = data.aws_iam_policy_document.dns_administrator_access.json,
+    inline_policy                       = one(data.aws_iam_policy_document.dns_administrator_access[*].json),
     policy_attachments                  = ["arn:${local.aws_partition}:iam::aws:policy/AWSSupportAccess"]
     customer_managed_policy_attachments = []
-  }]
+  }] : []
 }
