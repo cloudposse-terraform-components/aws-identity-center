@@ -37,7 +37,7 @@ provider "aws" {
 }
 
 # Dummy module to satisfy references from optional mixin files that use
-# module.iam_roles (e.g. policy-TerraformUpdateAccess.tf).
+# module.iam_roles (e.g. remote-state.tf).
 # When using account-map, vendor the v1-providers.tf mixin which replaces
 # this with the real iam-roles module.
 module "iam_roles" {
