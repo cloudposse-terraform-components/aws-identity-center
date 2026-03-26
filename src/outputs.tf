@@ -1,3 +1,13 @@
+output "ssoadmin_instance_arn" {
+  value       = one(data.aws_ssoadmin_instances.this.arns)
+  description = "ARN of the AWS IAM Identity Center (SSO) instance"
+}
+
+output "identity_store_id" {
+  value       = one(data.aws_ssoadmin_instances.this.identity_store_ids)
+  description = "ID of the Identity Store associated with the SSO instance"
+}
+
 output "permission_sets" {
   value       = module.permission_sets.permission_sets
   description = "Permission sets"
