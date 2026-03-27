@@ -35,6 +35,6 @@ output "group_map" {
 }
 
 output "user_map" {
-  value = { for user_key, user_output in data.aws_identitystore_user.this : user_key => user_output.user_id }
+  value       = { for user_key, user_output in data.aws_identitystore_user.this : user_key => user_output.user_id }
   description = "Map of user name to user ID"
 }
