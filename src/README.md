@@ -475,6 +475,7 @@ components:
 | [aws_iam_policy_document.terraform_state_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.terraform_state_access_additional](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_identitystore_group.idp](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/identitystore_group) | data source |
+| [aws_identitystore_user.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/identitystore_user) | data source |
 | [aws_partition.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/partition) | data source |
 | [aws_ssoadmin_instances.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssoadmin_instances) | data source |
 
@@ -518,8 +519,12 @@ components:
 | Name | Description |
 |------|-------------|
 | <a name="output_group_ids"></a> [group\_ids](#output\_group\_ids) | Group IDs for Identity Center (includes both manually created and IdP-synced groups) |
+| <a name="output_group_map"></a> [group\_map](#output\_group\_map) | Map of group display name to group ID |
+| <a name="output_identity_store_id"></a> [identity\_store\_id](#output\_identity\_store\_id) | ID of the Identity Store associated with the SSO instance |
 | <a name="output_permission_sets"></a> [permission\_sets](#output\_permission\_sets) | Permission sets |
 | <a name="output_sso_account_assignments"></a> [sso\_account\_assignments](#output\_sso\_account\_assignments) | SSO account assignments |
+| <a name="output_ssoadmin_instance_arn"></a> [ssoadmin\_instance\_arn](#output\_ssoadmin\_instance\_arn) | ARN of the AWS IAM Identity Center (SSO) instance |
+| <a name="output_user_map"></a> [user\_map](#output\_user\_map) | Map of user name to user ID |
 <!-- markdownlint-restore -->
 
 
