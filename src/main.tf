@@ -36,6 +36,12 @@ locals {
 
   account_assignments = concat(local.account_assignments_groups, local.account_assignments_users)
 
+  all_user_names = distinct(flatten([
+    for account_key, account in var.account_assignments : [
+      for user_key, user in lookup(account, "users", {}) : user_key
+    ]
+  ]))
+
   aws_partition = data.aws_partition.current.partition
 }
 
@@ -50,6 +56,19 @@ resource "aws_identitystore_group" "manual" {
   description  = "Group created with Terraform"
 
   identity_store_id = tolist(data.aws_ssoadmin_instances.this.identity_store_ids)[0]
+}
+
+data "aws_identitystore_user" "this" {
+  for_each = toset(local.all_user_names)
+
+  identity_store_id = tolist(data.aws_ssoadmin_instances.this.identity_store_ids)[0]
+
+  alternate_identifier {
+    unique_attribute {
+      attribute_path  = "UserName"
+      attribute_value = each.key
+    }
+  }
 }
 
 # Look up IdP-managed groups (synced from Google Workspace, Okta, etc.)

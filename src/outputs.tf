@@ -25,3 +25,16 @@ output "group_ids" {
   )
   description = "Group IDs for Identity Center (includes both manually created and IdP-synced groups)"
 }
+
+output "group_map" {
+  value = merge(
+    { for group_key, group_output in aws_identitystore_group.manual : group_output.display_name => group_output.group_id },
+    { for group_key, group_output in data.aws_identitystore_group.idp : group_output.display_name => group_output.group_id }
+  )
+  description = "Map of group display name to group ID"
+}
+
+output "user_map" {
+  value = { for user_key, user_output in data.aws_identitystore_user.this : user_key => user_output.user_id }
+  description = "Map of user name to user ID"
+}
