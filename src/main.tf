@@ -107,10 +107,6 @@ module "permission_sets" {
   )
 
   context = module.this.context
-
-  depends_on = [
-    aws_identitystore_group.manual
-  ]
 }
 
 module "sso_account_assignments" {
@@ -119,8 +115,4 @@ module "sso_account_assignments" {
 
   account_assignments = local.account_assignments
   context             = module.this.context
-
-  depends_on = [
-    aws_identitystore_group.manual
-  ]
 }
