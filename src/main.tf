@@ -36,6 +36,18 @@ locals {
 
   account_assignments = concat(local.account_assignments_groups, local.account_assignments_users)
 
+  # Merged display_name → group_id map for the sso_account_assignments submodule.
+  # Resolving IDs here (instead of inside the submodule's data source) means
+  # plan succeeds even when a Terraform-managed group has not yet been
+  # created. Manual groups contribute group_id from aws_identitystore_group.manual
+  # (known-after-apply on first plan, stable thereafter); IdP groups contribute
+  # IDs from the data source (always succeeds for SCIM-synced groups).
+  # Requires terraform-aws-sso >= <next release with var.group_ids>.
+  all_group_ids = merge(
+    { for k, v in aws_identitystore_group.manual : k => v.group_id },
+    { for k, v in data.aws_identitystore_group.idp : k => v.group_id },
+  )
+
   all_user_names = distinct(flatten([
     for account_key, account in var.account_assignments : [
       for user_key, user in lookup(account, "users", {}) : user_key
@@ -114,5 +126,6 @@ module "sso_account_assignments" {
   version = "1.2.0"
 
   account_assignments = local.account_assignments
+  group_ids           = local.all_group_ids
   context             = module.this.context
 }
