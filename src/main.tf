@@ -123,7 +123,7 @@ module "permission_sets" {
 
 module "sso_account_assignments" {
   source  = "cloudposse/sso/aws//modules/account-assignments"
-  version = "1.2.0"
+  version = "1.2.1"
 
   account_assignments = local.account_assignments
   group_ids           = local.all_group_ids
