@@ -99,7 +99,7 @@ data "aws_identitystore_group" "idp" {
 
 module "permission_sets" {
   source  = "cloudposse/sso/aws//modules/permission-sets"
-  version = "1.2.0"
+  version = "1.2.1"
 
   permission_sets = concat(
     local.overridable_additional_permission_sets,
