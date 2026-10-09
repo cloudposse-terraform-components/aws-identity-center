@@ -10,7 +10,7 @@
 #   - Allows the component to function without the account-map dependency
 module "account_map" {
   source  = "cloudposse/stack-config/yaml//modules/remote-state"
-  version = "2.0.0"
+  version = "2.0.1"
 
   component   = var.account_map_component_name
   tenant      = var.account_map_enabled ? module.iam_roles.global_tenant_name : null
